@@ -37,6 +37,15 @@ fn main() {
     }
     let root = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").unwrap());
     let target = env::var("TARGET").unwrap();
+    if target.contains("msvc")
+        && let Some(tool) = cc::windows_registry::find_tool(&target, "cl.exe")
+    {
+        for (name, value) in tool.get_envs() {
+            // C forwarders need the SDK environment even when native artifacts
+            // are cached or supplied through IREE_DIR. No workers exist yet.
+            unsafe { env::set_var(name, value) };
+        }
+    }
     let features = config::Configuration::new(config::FEATURES.iter().copied().filter(|feature| {
         env::var_os(format!(
             "CARGO_FEATURE_{}",
@@ -204,14 +213,6 @@ fn main() {
         let prepared = cache
             .prepare(&key, root_source, &mounts)
             .expect("assemble native dependencies");
-        if target.contains("msvc")
-            && let Some(tool) = cc::windows_registry::find_tool(&target, "cl.exe")
-        {
-            for (name, value) in tool.get_envs() {
-                // This build script has not created worker threads.
-                unsafe { env::set_var(name, value) };
-            }
-        }
         let jobs = env::var("IREE_RS_BUILD_JOBS")
             .map(|value| {
                 value

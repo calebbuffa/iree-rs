@@ -213,6 +213,12 @@ submissions automatically wait on asynchronous model accesses, and model calls
 automatically chain outstanding transfers on their tensor inputs.
 `Submission::completion()` exposes a fence for explicit downstream work.
 
+`tensor.reshape(&shape)` creates a zero-copy dense view without changing the
+dimensions of existing clones. Element count and type are preserved.
+`tensor.write(&values)` replaces the complete tensor contents after waiting for
+pending readers/writers, checking the element type and exact length. Reshaped
+and byte views share the updated storage, including checked subranges.
+
 This interface currently records fill/update/copy transfers, not arbitrary
 dispatches or collectives.
 

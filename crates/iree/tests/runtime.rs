@@ -56,3 +56,57 @@ fn validates_shapes_and_supports_scalar_and_empty_tensors() -> iree::Result<()> 
     }
     Ok(())
 }
+
+#[test]
+fn reshaped_views_share_updates_without_mutating_original_metadata() -> iree::Result<()> {
+    for &driver in DRIVERS {
+        let device = Instance::new()?.device(driver)?;
+        let original = device.tensor(&[2, 2], &[1_i32, 2, 3, 4])?;
+        let clone = original.clone();
+        let flat = original.reshape(&[4])?;
+        assert_eq!(original.shape(), [2, 2]);
+        assert_eq!(clone.shape(), [2, 2]);
+        assert_eq!(flat.shape(), [4]);
+        assert_eq!(flat.read::<i32>()?, [1, 2, 3, 4]);
+        flat.write(&[5_i32, 6, 7, 8])?;
+        assert_eq!(clone.read::<i32>()?, [5, 6, 7, 8]);
+        assert!(flat.write(&[1_f32; 4]).is_err());
+        assert!(flat.write(&[1_i32; 3]).is_err());
+        assert!(flat.reshape(&[3]).is_err());
+        assert!(flat.reshape(&[usize::MAX, 2]).is_err());
+        assert_eq!(flat.read::<i32>()?, [5, 6, 7, 8]);
+        let bytes = flat.as_buffer()?;
+        let mut commands = device.transfer_commands()?;
+        commands.fill(&bytes, &9_i32.to_ne_bytes())?;
+        drop(commands.submit()?);
+        flat.write(&[10_i32; 4])?;
+        assert_eq!(original.read::<i32>()?, [10; 4]);
+        drop(device);
+        drop(original);
+        drop(clone);
+        assert_eq!(flat.read::<i32>()?, [10; 4]);
+        assert_eq!(bytes.read()?.len(), 16);
+    }
+    Ok(())
+}
+
+#[test]
+fn scalar_empty_and_subrange_tensor_views_preserve_extents() -> iree::Result<()> {
+    for &driver in DRIVERS {
+        let device = Instance::new()?.device(driver)?;
+        let scalar = device.tensor(&[], &[42_i32])?.reshape(&[1, 1])?;
+        scalar.write(&[7_i32])?;
+        assert_eq!(scalar.reshape(&[])?.read::<i32>()?, [7]);
+        let empty = device.tensor::<f32>(&[0, 4], &[])?.reshape(&[2, 0])?;
+        empty.write::<f32>(&[])?;
+        assert_eq!(empty.shape(), [2, 0]);
+        assert!(empty.read::<f32>()?.is_empty());
+        let storage = device.tensor(&[4], &[1_i32, 2, 3, 4])?;
+        let subrange = storage.as_buffer()?.slice(4..12)?.as_tensor::<i32>(&[2])?;
+        let reshaped = subrange.reshape(&[1, 2])?;
+        reshaped.write(&[8_i32, 9])?;
+        assert_eq!(storage.read::<i32>()?, [1, 8, 9, 4]);
+        assert_eq!(reshaped.byte_len(), 8);
+    }
+    Ok(())
+}

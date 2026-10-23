@@ -230,6 +230,54 @@ impl Buffer {
 }
 
 impl Tensor {
+    /// Create a zero-copy dense view with a different shape.
+    ///
+    /// The element count and element type are preserved. This creates separate
+    /// shape metadata, so existing clones keep their original dimensions.
+    /// Storage and pending transfer/invocation dependencies remain shared.
+    pub fn reshape(&self, shape: &[usize]) -> Result<Tensor> {
+        if element_count(shape)? != element_count(&self.shape())? {
+            return Err(Error::invalid("reshape must preserve tensor element count"));
+        }
+        // Validate the dense encoding before constructing another dense view.
+        let _bytes = self.as_buffer()?;
+        let mut raw = ptr::null_mut();
+        check(unsafe {
+            sys::iree_hal_buffer_view_create(
+                self.buffer(),
+                shape.len(),
+                shape.as_ptr(),
+                self.element_type(),
+                sys::IREE_HAL_ENCODING_TYPE_DENSE_ROW_MAJOR as _,
+                sys::iree_allocator_system(),
+                &mut raw,
+            )
+        })?;
+        unsafe { Tensor::from_owned(self.device.clone(), raw) }
+    }
+
+    /// Replace all tensor elements with host data of the same type.
+    ///
+    /// Waits for outstanding safe API readers and writers before transferring.
+    /// Every aliased tensor and byte view observes the update; the shape is
+    /// unchanged. The input length must match the complete tensor extent.
+    pub fn write<T: Element>(&self, values: &[T]) -> Result<()> {
+        if self.element_type() != T::TYPE {
+            return Err(Error::invalid(
+                "tensor element type does not match requested Rust type",
+            ));
+        }
+        let length = crate::runtime::tensor_byte_length(&self.shape(), values)?;
+        let buffer = self.as_buffer()?;
+        if buffer.len() != length {
+            return Err(Error::invalid(
+                "tensor byte size does not match its element type",
+            ));
+        }
+        let bytes = unsafe { std::slice::from_raw_parts(values.as_ptr().cast::<u8>(), length) };
+        buffer.write(0, bytes)
+    }
+
     /// Borrow the tensor's initialized dense bytes as an owned shared buffer.
     ///
     /// The buffer retains native storage independently of this tensor and

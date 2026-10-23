@@ -50,8 +50,9 @@ impl StatusCode {
     pub const fn as_i32(self) -> i32 {
         self.0
     }
-    pub(crate) const fn from_native(value: i32) -> Self {
-        Self(value)
+    pub(crate) fn from_native(value: crate::sys::iree_status_code_t) -> Self {
+        // C enum signedness varies by target. IREE codes occupy five bits.
+        Self(i32::try_from(i64::from(value)).expect("native IREE status code exceeds i32"))
     }
 }
 
@@ -103,3 +104,26 @@ impl std::error::Error for Error {}
 
 /// Result of an owned API operation, preserving native diagnostic text.
 pub type Result<T> = std::result::Result<T, Error>;
+
+#[cfg(test)]
+mod tests {
+    use super::StatusCode;
+    use crate::sys;
+
+    #[test]
+    fn native_status_codes_preserve_their_numeric_values() {
+        for (native, expected) in [
+            (sys::IREE_STATUS_CANCELLED, StatusCode::CANCELLED),
+            (
+                sys::IREE_STATUS_INVALID_ARGUMENT,
+                StatusCode::INVALID_ARGUMENT,
+            ),
+            (sys::IREE_STATUS_NOT_FOUND, StatusCode::NOT_FOUND),
+            (sys::IREE_STATUS_DEFERRED, StatusCode::DEFERRED),
+        ] {
+            let code = StatusCode::from_native(native);
+            assert_eq!(code, expected);
+            assert_eq!(i64::from(code.as_i32()), i64::from(native));
+        }
+    }
+}

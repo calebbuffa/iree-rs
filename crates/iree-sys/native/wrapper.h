@@ -1,6 +1,14 @@
 #ifndef IREE_RS_WRAPPER_H_
 #define IREE_RS_WRAPPER_H_
 
+#if defined(__linux__)
+// IREE's inline futex helpers use syscall and timespec.
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE 1
+#endif
+#include <time.h>
+#endif
+
 #include "iree/runtime/api.h"
 #include "iree/async/api.h"
 #if IREE_RS_TASK
