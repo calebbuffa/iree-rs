@@ -1,0 +1,27 @@
+[package]
+name = "iree-gfx"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Native graphics interoperability for IREE and WGPU"
+readme = "README.md"
+include = ["src/**", "tests/**", "Cargo.toml", "README.md"]
+
+[features]
+default = []
+compiler = ["iree/compiler"]
+
+[dependencies]
+iree = { version = "0.1.0", path = "../iree", default-features = false, features = ["vulkan"] }
+wgpu = { version = "30", default-features = false, features = ["vulkan", "wgsl", "std"] }
+ash = "0.38"
+
+[dev-dependencies]
+pollster = "0.4"
+
+[lints]
+workspace = true
+
+[package.metadata.docs.rs]
+features = ["compiler"]

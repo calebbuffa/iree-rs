@@ -1,0 +1,91 @@
+# IREE v3.13.0, including the exact runtime submodules recorded by that release.
+[iree]
+version = "3.13.0"
+url = "https://github.com/iree-org/iree/archive/89ece87b89852100c0a4ac3d515e14842d090967.tar.gz"
+sha256 = "a79d6d63bad382bf8f35da00009d2acae6ecdfe086d174e15b10d5ff9e85548f"
+file = "iree-3.13.0.tar.gz"
+markers = ["CMakeLists.txt", "runtime/src/iree/runtime/api.h", "compiler/bindings/c/iree/compiler/embedding_api.h"]
+
+[flatcc]
+version = "9362cd00f0007d8cbee7bff86e90fb4b6b227ff3"
+url = "https://github.com/dvidelabs/flatcc/archive/{version}.tar.gz"
+sha256 = "f77f842e996f5bbfa25305a7b38b40d1325fb44154f2bf9880c58356ece92c62"
+file = "flatcc-9362cd00.tar.gz"
+markers = ["include/flatcc/flatcc_builder.h", "src/runtime/verifier.c"]
+
+[vulkan_headers]
+version = "df60f0316899460eeaaefa06d2dd7e4e300c1604"
+url = "https://github.com/KhronosGroup/Vulkan-Headers/archive/{version}.tar.gz"
+sha256 = "70de3ec1eec289552052dfb886a49a4578b65d84fd536da3254731c8165cb3e6"
+file = "vulkan-headers-df60f031.tar.gz"
+markers = ["CMakeLists.txt", "include/vulkan/vulkan.h"]
+
+[llvm]
+version = "32d702efa29d0fdd02cff7b79dea8fdbbcf059d4"
+url = "https://github.com/iree-org/llvm-project/archive/{version}.tar.gz"
+sha256 = "763236ec2e3b9e50cc31d60500430d167d93285ea6229a7a4270e149f1744d9a"
+file = "iree-llvm-32d702ef.tar.gz"
+markers = ["llvm/CMakeLists.txt", "mlir/CMakeLists.txt", "clang/CMakeLists.txt", "lld/CMakeLists.txt"]
+
+[stablehlo]
+version = "c2eaf28a5f5b6728c97414a8a09168d3e75943c9"
+url = "https://github.com/iree-org/stablehlo/archive/{version}.tar.gz"
+sha256 = "e21c0d667aef33af811d58d278e79c16e0b83ac16e1ae14b00130b1d653386c5"
+file = "iree-stablehlo-c2eaf28a.tar.gz"
+markers = ["CMakeLists.txt", "stablehlo/dialect/StablehloOps.td"]
+
+[spirv_cross]
+version = "7affe74d77f93a622bb5002789d5332d32e512ee"
+url = "https://github.com/KhronosGroup/SPIRV-Cross/archive/{version}.zip"
+sha256 = "4d9d66da6738f3b30ef00fdca9daf4887c08cd88d4147f0eeaf6bb2bd3686e84"
+file = "spirv-cross-7affe74d.zip"
+markers = ["CMakeLists.txt", "spirv_cross.hpp"]
+
+[torch_mlir]
+version = "52f5c1c4b86cc812227367c7c49c2d3f40b69e57"
+url = "https://github.com/iree-org/torch-mlir/archive/{version}.zip"
+sha256 = "06db37f3c4819b210b496ed9fe9b55f6c5615a332d7de606260e05dda382e6c3"
+file = "torch-mlir-52f5c1c4.zip"
+markers = ["CMakeLists.txt"]
+
+[hip_build_deps]
+version = "f7d58d4b1b82896458dd52aebc7328f88eaa5b16"
+url = "https://github.com/iree-org/hip-build-deps/archive/{version}.zip"
+sha256 = "eeb265aded130707fd4182307bdafe447f3ac65af1b3dc9570de7e6b7b487585"
+file = "hip-build-deps-f7d58d4b.zip"
+markers = ["include/hip/hip_version.h"]
+
+[hsa_runtime_headers]
+version = "cc2b5f429de4d1cb2be96ed10e6f45246e408d0e"
+url = "https://github.com/iree-org/hsa-runtime-headers/archive/{version}.zip"
+sha256 = "675fd9f0c780ecae64e65665bb0392bfafb3f653eedc725b021620d8863d384a"
+file = "hsa-runtime-headers-cc2b5f42.zip"
+markers = ["include/hsa/hsa.h"]
+
+[dawn]
+version = "851ba3e50c354ef66d16c518d4341c01ed6828cc"
+url = "https://github.com/ArthurSonzogni/dawn/archive/{version}.zip"
+sha256 = "60f8cd1060518092fe23dececb43fe1585f02ebf2173ecadd441211ff3414e6c"
+file = "dawn-851ba3e5.zip"
+markers = ["CMakeLists.txt"]
+
+[abseil]
+version = "04f3bc01d12cf58c90a1bb68990f087fa3c3ed19"
+url = "https://github.com/abseil/abseil-cpp/archive/{version}.zip"
+sha256 = "61a9709e240ec616e643fef150e174e9fda827c1af797d344273f4fa2dd60453"
+file = "abseil-04f3bc01.zip"
+markers = ["CMakeLists.txt"]
+
+[spirv_headers]
+version = "465055f6c9128772e20082e893d974146acf7a02"
+url = "https://github.com/KhronosGroup/SPIRV-Headers/archive/{version}.zip"
+sha256 = "3cae00f5ee4a28d88a933908c99fb4eac0920d2957ca13793be5dc98885d2b76"
+file = "spirv-headers-465055f6.zip"
+markers = ["CMakeLists.txt"]
+
+[spirv_tools]
+version = "5a1eea1546c372a945a27d9b10e0a059db6cc651"
+url = "https://github.com/KhronosGroup/SPIRV-Tools/archive/{version}.zip"
+sha256 = "6691a769f205c1e57e00864bedaba6e6f18e173fc059c612a754f2c4852dbd66"
+file = "spirv-tools-5a1eea15.zip"
+markers = ["CMakeLists.txt"]

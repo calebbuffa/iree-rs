@@ -1,0 +1,63 @@
+[package]
+name = "iree"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Owned, idiomatic Rust interfaces for IREE compilation and execution"
+readme = "README.md"
+include = ["src/**", "examples/**", "tests/**", "Cargo.toml", "README.md", "LICENSE", "LICENSE-LLVM-EXCEPTION", "NOTICE", "CHANGELOG.md"]
+
+[features]
+default = ["cpu"]
+cpu = ["iree-sys/cpu", "local-sync", "local-task"]
+local-sync = ["iree-sys/local-sync"]
+local-task = ["iree-sys/local-task", "task"]
+task = ["iree-sys/task"]
+vulkan = ["iree-sys/vulkan"]
+cuda = ["iree-sys/cuda"]
+hip = ["iree-sys/hip"]
+amdgpu = ["iree-sys/amdgpu"]
+metal = ["iree-sys/metal"]
+null = ["iree-sys/null"]
+webgpu = ["iree-sys/webgpu"]
+compiler = ["iree-sys/compiler", "input-stablehlo"]
+target-llvm-cpu = ["compiler", "iree-sys/target-llvm-cpu"]
+target-vulkan = ["compiler", "iree-sys/target-vulkan"]
+target-cuda = ["compiler", "iree-sys/target-cuda"]
+target-rocm = ["compiler", "iree-sys/target-rocm"]
+target-metal = ["compiler", "iree-sys/target-metal"]
+target-webgpu = ["compiler", "iree-sys/target-webgpu"]
+target-wasm = ["compiler", "iree-sys/target-wasm"]
+llvm-aarch64 = ["target-llvm-cpu", "iree-sys/llvm-aarch64"]
+llvm-arm = ["target-llvm-cpu", "iree-sys/llvm-arm"]
+llvm-riscv = ["target-llvm-cpu", "iree-sys/llvm-riscv"]
+llvm-x86 = ["target-llvm-cpu", "iree-sys/llvm-x86"]
+llvm-webassembly = ["target-wasm", "iree-sys/llvm-webassembly"]
+input-stablehlo = ["iree-sys/input-stablehlo"]
+input-tosa = ["compiler", "iree-sys/input-tosa"]
+input-torch = ["compiler", "iree-sys/input-torch"]
+
+[dependencies]
+iree-sys = { version = "0.1.0", path = "../iree-sys", default-features = false }
+
+[dev-dependencies]
+pollster = "0.4"
+
+[[example]]
+name = "mlp"
+required-features = ["compiler"]
+
+[[example]]
+name = "compile"
+required-features = ["compiler"]
+
+[[example]]
+name = "runtime"
+required-features = ["local-task"]
+
+[lints]
+workspace = true
+
+[package.metadata.docs.rs]
+features = ["compiler", "vulkan"]

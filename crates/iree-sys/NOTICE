@@ -1,0 +1,13 @@
+IREE Rust binding crate
+
+Generated API declarations and documentation are derived from IREE 3.13.0.
+Copyright The IREE Authors.
+https://github.com/iree-org/iree
+
+IREE and its LLVM-derived components are licensed under the Apache License 2.0
+with LLVM Exceptions. See LICENSE and LICENSE-LLVM-EXCEPTION.
+The Rust wrapper is licensed under Apache-2.0.
+
+Distribution of native libraries, compiler
+tools, SDK components, or their object code must also comply with their
+respective licenses and attribution requirements.

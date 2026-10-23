@@ -1,0 +1,8 @@
+[package]
+name = "xtask"
+version = "0.0.0"
+edition.workspace = true
+publish = false
+
+[dependencies]
+woodshed = { version = "0.2.3", default-features = false, features = ["bundle"] }

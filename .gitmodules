@@ -1,0 +1,3 @@
+[submodule "extern/iree"]
+	path = extern/iree
+	url = https://github.com/iree-org/iree.git
