@@ -146,6 +146,17 @@ mod gguf {
         let mut truncated_table = fixture.to_vec();
         truncated_table[8..16].copy_from_slice(&u64::MAX.to_le_bytes());
         assert!(parse_owned(truncated_table).is_err());
+
+        let mut truncated_metadata = fixture.to_vec();
+        truncated_metadata[16..24].copy_from_slice(&u64::MAX.to_le_bytes());
+        assert!(parse_owned(truncated_metadata).is_err());
+
+        let mut unsupported_tensor_type = fixture.to_vec();
+        unsupported_tensor_type[318..322].copy_from_slice(&u32::MAX.to_le_bytes());
+        assert_eq!(
+            parse_owned(unsupported_tensor_type).err().unwrap().code(),
+            ireert::Code::Unimplemented
+        );
     }
 }
 
@@ -323,5 +334,52 @@ mod safetensors {
                 ireert::Code::InvalidArgument
             );
         }
+    }
+
+    #[test]
+    fn metadata_empty_ranges_and_ignored_tensor_fields() {
+        let header = r#"{"__metadata__":{"format":"pt"},"tensor":{"dtype":"F32","shape":[2],"data_offsets":[0,8]},"empty":{"data_offsets":[8,8]}}"#;
+        let bytes = with_header(header, &[0; 8]);
+        let index = parse_owned(bytes).unwrap();
+        assert_eq!(index.len(), 2);
+
+        let tensor = index.lookup("tensor").unwrap();
+        assert_eq!(tensor.length, 8);
+        assert_eq!(
+            tensor.storage,
+            ParameterStorage::File {
+                offset: 8 + header.len() as u64
+            }
+        );
+        let empty = index.lookup("empty").unwrap();
+        assert_eq!(empty.length, 0);
+        assert_eq!(
+            empty.storage,
+            ParameterStorage::File {
+                offset: 8 + header.len() as u64 + 8
+            }
+        );
+        assert_eq!(
+            index.lookup("__metadata__").unwrap_err().code(),
+            ireert::Code::NotFound
+        );
+    }
+
+    #[test]
+    fn rejects_invalid_header_lengths_and_offset_arrays() {
+        let mut truncated_header = 16_u64.to_le_bytes().to_vec();
+        truncated_header.extend_from_slice(b"{}");
+        assert!(parse_owned(truncated_header).is_err());
+
+        for offsets in ["[]", "[0]", "[-1,0]", "[0, 18446744073709551616]"] {
+            let header = format!(r#"{{"tensor":{{"data_offsets":{offsets}}}}}"#);
+            assert!(
+                parse_owned(with_header(&header, &[0; 4])).is_err(),
+                "accepted invalid offsets {offsets}"
+            );
+        }
+
+        let missing_offsets = with_header(r#"{"tensor":{"dtype":"F32","shape":[1]}}"#, &[0; 4]);
+        assert!(parse_owned(missing_offsets).is_err());
     }
 }
