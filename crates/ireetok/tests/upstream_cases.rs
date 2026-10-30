@@ -314,10 +314,7 @@ fn upstream_regex_replacement_covers_whitespace_edges_unicode_and_expansion() ->
             "{input:?}"
         );
     }
-    assert_eq!(
-        normalize_chunks(&collapse_spaces, &["a ", " b"])?,
-        b"a b"
-    );
+    assert_eq!(normalize_chunks(&collapse_spaces, &["a ", " b"])?, b"a b");
 
     let collapse_whitespace = Normalizer::regex_replace(r"\s+", " ")?;
     for (input, expected) in [
@@ -351,8 +348,21 @@ fn upstream_regex_replacement_covers_whitespace_edges_unicode_and_expansion() ->
 
     let adjacent_matches = Normalizer::regex_replace(r"[0-9]+", "X")?;
     assert_eq!(normalize(&adjacent_matches, "a1b23c456d")?, b"aXbXcXd");
+    let non_word = Normalizer::regex_replace(r"\W+", "_")?;
+    assert_eq!(normalize(&non_word, "hello, world!")?, b"hello_world_");
+    let alternation = Normalizer::regex_replace(r"cat|dog", "pet")?;
+    assert_eq!(
+        normalize(&alternation, "my cat and dog")?,
+        b"my pet and pet"
+    );
+    let character_class = Normalizer::regex_replace(r"[aeiou]+", "_")?;
+    assert_eq!(normalize(&character_class, "hello")?, b"h_ll_");
+    let empty_content = Normalizer::regex_replace(r" {2,}", "")?;
+    assert_eq!(normalize(&empty_content, "a  b")?, b"ab");
+    assert_eq!(normalize(&collapse_spaces, "")?, b"");
     let word = Normalizer::regex_replace(r"\w+", "X")?;
     assert_eq!(normalize(&word, "hello world")?, b"X X");
+    assert_eq!(normalize(&word, "abc")?, b"X");
     Ok(())
 }
 

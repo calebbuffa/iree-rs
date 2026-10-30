@@ -23,11 +23,11 @@ tokenizer = ["dep:ireetok"]
 vulkan-compiler = ["ireec/target-vulkan"]
 
 [dependencies]
-ireert = { path = "../crates/ireert" }
-ireec = { path = "../crates/ireec" }
-iree-sample-dynamic-module = { path = "custom_module/dynamic-module" }
+ireert = { version = "0.1.0", path = "../crates/ireert" }
+ireec = { version = "0.1.0", path = "../crates/ireec" }
+iree-sample-dynamic-module = { version = "0.1.0", path = "custom_module/dynamic-module" }
 image = { version = "0.25", default-features = false, features = ["png"] }
-ireetok = { path = "../crates/ireetok", optional = true }
+ireetok = { version = "0.1.0", path = "../crates/ireetok", optional = true }
 
 [lints]
 workspace = true

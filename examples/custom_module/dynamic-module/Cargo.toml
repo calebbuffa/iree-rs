@@ -10,8 +10,8 @@ publish = false
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-iree-native = { path = "../../../crates/iree-native" }
-ireert = { path = "../../../crates/ireert" }
+iree-native = { version = "0.1.0", path = "../../../crates/iree-native" }
+ireert = { version = "0.1.0", path = "../../../crates/ireert" }
 
 [lints]
 workspace = true
