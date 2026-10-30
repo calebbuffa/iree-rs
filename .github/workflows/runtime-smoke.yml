@@ -1,0 +1,110 @@
+name: Runtime smoke
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/runtime-smoke.yml'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'rust-toolchain*'
+      - '.cargo/**'
+      - 'crates/iree-native/**'
+      - 'crates/ireert/**'
+      - 'tests/support/**'
+      - '!crates/iree-native/**/*.md'
+      - '!crates/iree-native/docs/**'
+      - '!crates/ireert/**/*.md'
+  push:
+    paths:
+      - '.github/workflows/runtime-smoke.yml'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'rust-toolchain*'
+      - '.cargo/**'
+      - 'crates/iree-native/**'
+      - 'crates/ireert/**'
+      - 'tests/support/**'
+      - '!crates/iree-native/**/*.md'
+      - '!crates/iree-native/docs/**'
+      - '!crates/ireert/**/*.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: runtime-smoke-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    # PRs cover topic branches; only seed shared caches on default-branch pushes.
+    if: github.event_name != 'push' || github.ref_name == github.event.repository.default_branch
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-24.04, windows-2022, macos-15]
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      CARGO_INCREMENTAL: '0'
+      CARGO_TERM_COLOR: always
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          submodules: false
+
+      - uses: dtolnay/rust-toolchain@1.95.0
+      - uses: ilammy/msvc-dev-cmd@v1
+        if: runner.os == 'Windows'
+
+      - name: Locate preinstalled build tools
+        id: tools
+        run: |
+          $ErrorActionPreference = 'Stop'
+          foreach ($tool in @('cmake', 'ninja', 'python')) {
+            Get-Command $tool -ErrorAction Stop | Out-Null
+          }
+          if ($IsWindows) {
+            $clang = 'C:\Program Files\LLVM\bin\libclang.dll'
+          } elseif ($IsMacOS) {
+            $compiler = & xcrun --find clang
+            if ($LASTEXITCODE -ne 0) { throw 'Cannot locate Xcode clang' }
+            $clang = Join-Path (Split-Path (Split-Path $compiler)) 'lib/libclang.dylib'
+          } else {
+            $clang = Get-ChildItem '/usr/lib/llvm-*/lib/libclang.so*' |
+              Sort-Object FullName -Descending |
+              Select-Object -First 1 -ExpandProperty FullName
+          }
+          if (!$clang -or !(Test-Path $clang)) {
+            throw 'The runner image must provide host libclang'
+          }
+          "LIBCLANG_PATH=$(Split-Path $clang)" >> $env:GITHUB_ENV
+          "IREE_NATIVE_CACHE_DIR=$(Join-Path $env:RUNNER_TEMP 'iree-smoke')" >> $env:GITHUB_ENV
+          "IREE_NATIVE_BUILD_JOBS=$([Environment]::ProcessorCount)" >> $env:GITHUB_ENV
+          "image=$env:ImageVersion" >> $env:GITHUB_OUTPUT
+
+      - name: Cache runtime SDK and its source/header paths
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.IREE_NATIVE_CACHE_DIR }}
+          key: runtime-native-v1-${{ runner.os }}-${{ runner.arch }}-${{ steps.tools.outputs.image }}-${{ hashFiles('crates/iree-native/build.rs', 'crates/iree-native/Cargo.toml', 'crates/iree-native/native/**', 'Cargo.lock') }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: runtime-smoke
+
+      - name: Build, link, and run CPU smoke test
+        run: |
+          $features = & cargo tree --locked -p ireert --edges features
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect runtime dependencies' }
+          if ($features -match 'ireec v|iree-native feature "(compiler|target-|llvm-)') {
+            throw 'Runtime smoke must not enable the compiler or LLVM/MLIR'
+          }
+          cargo test --locked -p ireert --test smoke -- --nocapture
