@@ -1,4 +1,4 @@
-//! Backend discovery shared by HAL CTS tests.
+//! Backend discovery shared by runtime-only and end-to-end HAL CTS tests.
 
 #[cfg(feature = "local-task")]
 use ireert::task::{Executor, Topology};

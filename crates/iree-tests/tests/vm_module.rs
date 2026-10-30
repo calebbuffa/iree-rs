@@ -1,4 +1,4 @@
-//! Public VM module, context, reflection, and invocation integration coverage.
+//! Compiler/runtime VM module, context, reflection, and invocation coverage.
 // Internal stack-frame and bytecode-verifier mutation cases have no public C API surface.
 
 use ireec::{Compiler, Device, InputConversion, Options, Output, Pipeline, Target};

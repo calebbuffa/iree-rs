@@ -1,10 +1,9 @@
 //! Rust ports of representative upstream HAL queue CTS cases.
 
-mod support {
-    #[path = "cts_exec.rs"]
-    pub mod cts_exec;
-}
+#[path = "../../../tests/support/cts_exec.rs"]
+mod cts_exec;
 
+use cts_exec::{allocate_transfer_buffer, available_devices};
 use ireert::hal::{
     AllocaFlags, BufferBinding, BufferParams, BufferUsage, DeallocaFlags, ExecuteFlags,
     HostCallFlags, MemoryAccess, MemoryType, QueueAffinity, QueueSubmission, Semaphore,
@@ -14,7 +13,6 @@ use std::sync::{
     Arc,
     atomic::{AtomicBool, Ordering},
 };
-use support::cts_exec::{allocate_transfer_buffer, available_devices};
 
 fn signal_point(semaphore: &Semaphore, value: u64) -> SemaphorePoint<'_> {
     SemaphorePoint { semaphore, value }

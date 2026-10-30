@@ -1,0 +1,28 @@
+[package]
+name = "iree-tests"
+description = "Compiler/runtime end-to-end tests for the IREE Rust workspace"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[features]
+default = ["cpu"]
+cpu = ["ireert/cpu", "local-sync", "local-task"]
+local-sync = ["ireert/local-sync"]
+local-task = ["ireert/local-task"]
+vulkan = ["ireert/vulkan", "ireec/target-vulkan"]
+cuda = ["ireert/cuda", "ireec/target-cuda"]
+hip = ["ireert/hip"]
+amdgpu = ["ireert/amdgpu"]
+metal = ["ireert/metal"]
+null = ["ireert/null"]
+target-llvm-cpu = ["ireec/target-llvm-cpu"]
+
+[dev-dependencies]
+ireec = { version = "0.1.0", path = "../ireec" }
+ireert = { version = "0.1.0", path = "../ireert", default-features = false }
+
+[lints]
+workspace = true

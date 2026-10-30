@@ -61,6 +61,7 @@ function Get-CheckedOutput {
 }
 
 $lock = $null
+$extracted = $null
 Push-Location $workspace
 try {
     if (-not $IsWindows) {
@@ -208,7 +209,9 @@ try {
     Invoke-Checked 'cargo' $packageArguments
     $metadata = Get-CheckedOutput 'cargo' @('metadata', '--no-deps', '--format-version', '1') | ConvertFrom-Json
     $version = ($metadata.packages | Where-Object name -EQ 'iree-native').version
-    $manifest = Join-Path $OutputDirectory "package\iree-native-$version\Cargo.toml"
+    $extracted = Join-Path ([IO.Path]::GetTempPath()) ('iree-native-docs-' + [Guid]::NewGuid().ToString('N'))
+    Copy-Item (Join-Path $OutputDirectory "package\iree-native-$version") $extracted -Recurse
+    $manifest = Join-Path $extracted 'Cargo.toml'
     $env:DOCS_RS = '1'
     $env:WOODSHED_OFFLINE = '1'
     $env:IREE_NATIVE_DIR = Join-Path $OutputDirectory 'deliberately-missing-sdk'
@@ -225,8 +228,15 @@ try {
 }
 finally {
     if ($lock) { $lock.Dispose() }
-    foreach ($name in $variables) {
-        [Environment]::SetEnvironmentVariable($name, $saved[$name], 'Process')
+    try {
+        if ($extracted -and (Test-Path $extracted)) {
+            Remove-Item -LiteralPath $extracted -Recurse -Force
+        }
     }
-    Pop-Location
+    finally {
+        foreach ($name in $variables) {
+            [Environment]::SetEnvironmentVariable($name, $saved[$name], 'Process')
+        }
+        Pop-Location
+    }
 }

@@ -13,6 +13,12 @@ Choose the crate that matches the work:
 `ireec-ir` provides internal MLIR bindings for the same compiler instance as
 `ireec`.
 
+`ireec` and `ireert` do not depend on one another, even for development or tests.
+`cargo test -p ireert` does not enable compiler features or require LLVM/MLIR.
+The unpublished `iree-tests` package covers compiler/runtime interoperability;
+select it explicitly when running those tests. A full workspace test still
+includes the compiler.
+
 ## Run a sample
 
 From the workspace root, this example compiles a small model and executes it

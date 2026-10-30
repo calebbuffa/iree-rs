@@ -1,17 +1,13 @@
 //! Rust ports of representative upstream HAL command-buffer CTS cases.
 
-mod support {
-    #[path = "cts_compile.rs"]
-    pub mod cts_compile;
-    #[path = "cts_exec.rs"]
-    pub mod cts_exec;
-}
+#[path = "../../../tests/support/cts_exec.rs"]
+mod cts_exec;
 
+use cts_exec::{allocate_transfer_buffer, available_devices};
 use ireert::hal::{
     CommandBuffer, CommandBufferMode, CommandCategory, QueueAffinity, QueueSubmission,
     SemaphorePoint,
 };
-use support::cts_exec::{allocate_transfer_buffer, available_devices};
 
 macro_rules! on_each_device {
     ($name:ident, |$driver:pat_param, $device:ident: $device_type:ty| $body:block) => {
@@ -135,23 +131,6 @@ on_each_device!(copy_buffer, |_, device: &ireert::hal::GroupedDevice| {
     unsafe { device.transfer_d2h(&target, 0, &mut actual, None) }.expect("read target");
     assert_eq!(&actual[4..12], &[0, 1, 2, 3, 4, 5, 6, 7]);
 });
-
-#[test]
-fn compile_upstream_dispatch_testdata_for_each_backend() {
-    for (driver, device) in available_devices().expect("enumerate usable backends") {
-        let artifact = support::cts_compile::compile_cts_executable(
-            &device,
-            &driver,
-            "command_buffer_dispatch_test.mlir",
-        )
-        .expect("compile upstream dispatch testdata");
-        if let Some((_, bytes)) = artifact {
-            assert!(!bytes.is_empty());
-        } else {
-            eprintln!("skipping {driver}: no supported executable format");
-        }
-    }
-}
 
 fn assert_recorded_fill(
     device: &ireert::hal::GroupedDevice,

@@ -12,7 +12,7 @@ documentation = "https://docs.rs/ireert"
 
 [features]
 default = ["cpu"]
-cpu = ["iree-native/cpu"]
+cpu = ["iree-native/cpu", "local-sync", "local-task"]
 bare-metal = ["iree-native/bare-metal"]
 io-index = ["iree-native/io-index"]
 io-parameters = ["io-index", "iree-native/io-parameters"]
@@ -37,7 +37,6 @@ bytemuck = { version = "1", features = ["derive"] }
 
 [dev-dependencies]
 proptest = "1"
-ireec = { version = "0.1.0", path = "../ireec" }
 
 [lints]
 workspace = true

@@ -1,12 +1,11 @@
 //! Rust port of the upstream direct queue-dispatch CTS case.
 
-mod support {
-    #[path = "cts_compile.rs"]
-    pub mod cts_compile;
-    #[path = "cts_exec.rs"]
-    pub mod cts_exec;
-}
+#[path = "support/cts_compile.rs"]
+mod cts_compile;
+#[path = "../../../tests/support/cts_exec.rs"]
+mod cts_exec;
 
+use cts_exec::{allocate_transfer_buffer, available_devices};
 use ireert::hal::{
     BufferBinding, BufferParams, BufferRef, BufferUsage, DispatchConfig, DispatchFlags,
     ExecutableCache, ExecutableCachingMode, ExecutableFunction, ExecutableParams, MemoryAccess,
@@ -14,9 +13,25 @@ use ireert::hal::{
     WaitFlags,
 };
 use std::error::Error as StdError;
-use support::cts_exec::{allocate_transfer_buffer, available_devices};
 
 type TestResult<T = ()> = std::result::Result<T, Box<dyn StdError>>;
+
+#[test]
+fn compile_upstream_dispatch_testdata_for_each_backend() {
+    for (driver, device) in available_devices().expect("enumerate usable backends") {
+        let artifact = cts_compile::compile_cts_executable(
+            &device,
+            &driver,
+            "command_buffer_dispatch_test.mlir",
+        )
+        .expect("compile upstream dispatch testdata");
+        if let Some((_, bytes)) = artifact {
+            assert!(!bytes.is_empty());
+        } else {
+            eprintln!("skipping {driver}: no supported executable format");
+        }
+    }
+}
 
 #[test]
 fn dispatch_with_constants_and_bindings() -> TestResult {
@@ -24,7 +39,7 @@ fn dispatch_with_constants_and_bindings() -> TestResult {
     assert!(!devices.is_empty(), "no usable HAL backend available");
 
     for (driver, device) in devices {
-        let Some((format, bytes)) = support::cts_compile::compile_cts_executable(
+        let Some((format, bytes)) = cts_compile::compile_cts_executable(
             &device,
             &driver,
             "command_buffer_dispatch_constants_bindings_test.mlir",
@@ -155,7 +170,7 @@ fn dispatch_waits_for_deferred_semaphore_before_execution() -> TestResult {
     assert!(!devices.is_empty(), "no usable HAL backend available");
 
     for (driver, device) in devices {
-        let Some((format, bytes)) = support::cts_compile::compile_cts_executable(
+        let Some((format, bytes)) = cts_compile::compile_cts_executable(
             &device,
             &driver,
             "command_buffer_dispatch_constants_bindings_test.mlir",
@@ -277,7 +292,7 @@ fn indirect_dispatch_uses_buffer_workgroup_counts() -> TestResult {
     const PARAMETER_BYTES: usize = 3 * std::mem::size_of::<u32>();
 
     for (driver, device) in devices {
-        let Some((format, bytes)) = support::cts_compile::compile_cts_executable(
+        let Some((format, bytes)) = cts_compile::compile_cts_executable(
             &device,
             &driver,
             "command_buffer_dispatch_multi_workgroup_test.mlir",

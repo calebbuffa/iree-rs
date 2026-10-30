@@ -916,6 +916,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "iree-tests"
+version = "0.1.0"
+dependencies = [
+ "ireec",
+ "ireert",
+]
+
+[[package]]
 name = "iree-wgpu"
 version = "0.1.0"
 dependencies = [
@@ -953,7 +961,6 @@ version = "0.1.0"
 dependencies = [
  "bytemuck",
  "iree-native",
- "ireec",
  "memmap2",
  "proptest",
 ]

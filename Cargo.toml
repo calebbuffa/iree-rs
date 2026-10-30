@@ -6,6 +6,7 @@ members = [
     "crates/ireert",
     "crates/ireetok",
     "crates/iree-wgpu",
+    "crates/iree-tests",
     "examples",
     "examples/custom_module/dynamic-module",
 ]

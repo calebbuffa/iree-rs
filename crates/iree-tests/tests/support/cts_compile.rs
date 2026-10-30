@@ -1,4 +1,4 @@
-//! Compilation of upstream HAL executable fixtures.
+//! Compilation of upstream HAL executable fixtures for end-to-end tests.
 
 pub fn compile_cts_executable(
     device: &ireert::hal::Device,

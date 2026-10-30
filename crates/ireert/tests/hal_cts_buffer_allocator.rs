@@ -1,7 +1,7 @@
 //! HAL allocator CTS ports; test panics surface assertion and setup failures.
 // Test-only panics surface CTS assertion and setup failures; they are not library behavior.
 
-#[path = "support\\cts.rs"]
+#[path = "../../../tests/support/cts.rs"]
 mod cts;
 
 use cts::devices;

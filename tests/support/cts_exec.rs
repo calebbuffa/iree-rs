@@ -1,4 +1,4 @@
-//! Backend discovery and helpers shared by runtime CTS integration tests.
+//! Backend discovery and buffers shared by runtime-only and end-to-end CTS tests.
 
 use ireert::asynchronous::{FrontierTracker, ProactorPool};
 use ireert::hal::{

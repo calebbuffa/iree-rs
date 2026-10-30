@@ -1,6 +1,6 @@
 //! HAL file CTS ports.
 
-#[path = "support\\cts.rs"]
+#[path = "../../../tests/support/cts.rs"]
 mod cts;
 #[path = "support\\cts_buffer.rs"]
 mod cts_buffer;

@@ -1,7 +1,9 @@
 //! Packaged documentation must be complete and detect stale or edited snapshots.
 #[path = "../native/config.rs"]
+#[allow(dead_code)]
 mod config;
 #[path = "../native/documentation.rs"]
+#[allow(dead_code)]
 mod documentation;
 
 use std::{fs, path::PathBuf, time::SystemTime};

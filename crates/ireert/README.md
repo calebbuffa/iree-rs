@@ -11,6 +11,11 @@ execution; compiler targets are selected separately in `ireec`.
 Parameter I/O and the IRPA, GGUF, and safetensors parsers are optional runtime
 features.
 
+`ireert` has no dependency on `ireec`, including for tests. Run
+`cargo test -p ireert` for runtime-only coverage without building LLVM/MLIR.
+Compiler/runtime end-to-end coverage lives in the separate, unpublished
+`iree-tests` package (`cargo test -p iree-tests`).
+
 VM bytecode and executable plugins can run native code. Load only trusted
 artifacts. The [`iree-samples` index](../../examples/README.md) shows runtime
 and HAL usage; native build requirements are in
