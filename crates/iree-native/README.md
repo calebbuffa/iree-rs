@@ -99,3 +99,31 @@ The packaged bindings and generated upstream API documentation use
 [LICENSE](LICENSE), [LICENSE-LLVM-EXCEPTION](LICENSE-LLVM-EXCEPTION), and
 [NOTICE](NOTICE). Redistributed native libraries and compiler resources also
 require their respective third-party license notices.
+
+## Regenerating release documentation
+
+After bumping versions, run this from the repository root in PowerShell 7:
+
+```powershell
+.\crates\iree-native\regenerate-docs.ps1 -InstallToolchains -AllowDirty
+```
+
+The command regenerates all four target snapshots, runs their integrity tests,
+verifies the crate archive with `cargo package`, and builds the extracted
+package's documentation for every docs.rs target without native SDK/cache access.
+`-InstallToolchains` allows downloading Zig's cross-platform libc headers,
+Emscripten, and missing nightly Rust components; subsequent runs reuse them.
+The ordinary native build prerequisites above must already be installed.
+You can instead provide `-ZigLib` and `-EmsdkRoot`, or
+`-ClangArgumentsFile` with target-to-argument-array JSON for custom SDKs.
+
+The command stops on any error, restores environment variables, and never
+publishes. Commit the regenerated snapshots, then publish explicitly:
+
+```text
+cargo publish -p iree-native
+```
+
+docs.rs builds the hosted HTML automatically after publication. Snapshot
+regeneration is required when the IREE pin or binding-generator inputs change;
+Rust-only package version bumps can reuse unchanged snapshots.

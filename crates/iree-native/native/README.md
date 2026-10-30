@@ -29,6 +29,11 @@ source access, and cross-compilation.
 
 ## Documentation snapshots
 
+For the complete maintainer workflow, run
+`..\regenerate-docs.ps1 -InstallToolchains -AllowDirty` from this directory.
+It handles generation, integrity tests, package verification, and the four-target
+hosted-documentation check. The details below explain the underlying controls.
+
 `DOCS_RS=1` selects `../docs/bindings/<TARGET>/snapshot.json` and verifies it against the pinned source
 declarations and binding-generator inputs, verifies the declaration checksums,
 and copies the declarations into `OUT_DIR`. Missing targets and stale snapshots

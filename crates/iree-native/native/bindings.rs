@@ -321,7 +321,12 @@ fn generate_impl(
         }
         // Prettyplease keeps inspection and external audit output stable.
         // Export discovery uses syntax rather than depending on that formatting.
-        let text = normalize_bindings(&builder.generate()?.to_string())?;
+        let generated = builder.generate()?.to_string();
+        if documentation {
+            fs::write(out.join(format!("{family}.unprocessed")), &generated)?;
+        }
+        let text = normalize_bindings(&generated)
+            .map_err(|error| format!("normalize {family} declarations for {target}: {error}"))?;
         let inventory = Inventory::parse(&text)?;
         if family == "base" {
             println!("cargo:rustc-check-cfg=cfg(iree_native_flags)");

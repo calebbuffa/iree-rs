@@ -40,6 +40,32 @@ fn integer_bitfield_helpers_use_casts_without_redundant_unsafe()
 }
 
 #[test]
+fn c_integer_bitfield_helpers_normalize_without_assuming_target_integer_widths()
+-> Result<(), Box<dyn std::error::Error>> {
+    let output = normalize_bindings(
+        r#"
+        pub struct Record { _bitfield_1: Bits }
+        impl Record {
+            pub fn flags(&self) -> ::core::ffi::c_int {
+                unsafe { ::core::mem::transmute(self._bitfield_1.get(0usize, 24u8) as u32) }
+            }
+            pub fn set_flags(&mut self, val: ::core::ffi::c_int) {
+                unsafe {
+                    let val: u32 = ::core::mem::transmute(val);
+                    self._bitfield_1.set(0usize, 24u8, val as u64)
+                }
+            }
+        }
+        "#,
+    )?;
+    assert!(!output.contains("transmute"));
+    assert!(!output.contains("unsafe"));
+    assert!(output.contains("as ::core::ffi::c_int"));
+    syn::parse_file(&output)?;
+    Ok(())
+}
+
+#[test]
 fn generated_defaults_keep_initialization_and_explain_its_safety()
 -> Result<(), Box<dyn std::error::Error>> {
     let source = r#"

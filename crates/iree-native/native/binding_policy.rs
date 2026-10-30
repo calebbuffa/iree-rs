@@ -123,7 +123,10 @@ pub fn normalize_bindings(source: &str) -> syn::Result<String> {
             };
             policy.visit_block_mut(&mut method.block);
             if let Some(error) = policy.error {
-                return Err(error);
+                return Err(syn::Error::new_spanned(
+                    &method.sig,
+                    format!("{owner}::{name}: {error}"),
+                ));
             }
         }
     }
@@ -168,6 +171,17 @@ impl HelperPolicy<'_> {
                     | "i64"
                     | "i128"
                     | "isize"
+                    | "c_char"
+                    | "c_schar"
+                    | "c_uchar"
+                    | "c_short"
+                    | "c_ushort"
+                    | "c_int"
+                    | "c_uint"
+                    | "c_long"
+                    | "c_ulong"
+                    | "c_longlong"
+                    | "c_ulonglong"
             ) {
                 return Some(name);
             }
