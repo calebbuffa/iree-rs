@@ -5,4 +5,3 @@
 **/__pycache__/
 /crates/iree-native/generated/
 ref_only
-**/docs
