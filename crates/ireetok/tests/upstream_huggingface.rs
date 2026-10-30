@@ -2,12 +2,8 @@
 
 use ireetok::{BatchEncodeInput, EncodeOptions, TokenId, TokenOutput, Tokenizer};
 
-const BPE_BYTELEVEL: &str = include_str!(
-    "../../../extern/iree/runtime/src/iree/tokenizer/testdata/bpe_bytelevel_minimal.json"
-);
-const WORDPIECE_BERT_PAIR: &str = include_str!(
-    "../../../extern/iree/runtime/src/iree/tokenizer/testdata/wordpiece_bert_pair_minimal.json"
-);
+const BPE_BYTELEVEL: &str = include_str!("fixtures/bpe_bytelevel_minimal.json");
+const WORDPIECE_BERT_PAIR: &str = include_str!("fixtures/wordpiece_bert_pair_minimal.json");
 
 fn encode_streaming(
     tokenizer: &Tokenizer,

@@ -36,6 +36,10 @@ impl Segmenter {
 }
 impl SegmenterState<'_> {
     /// Processes normalized text into segment ranges.
+    ///
+    /// Ranges are relative to this input's position in the stream. Pending
+    /// segments may start in an earlier chunk; resolve them with
+    /// [`Segment::absolute_range`] before indexing retained text.
     pub fn process(&mut self, input: &str, output: &mut [Segment]) -> Result<Progress> {
         let mut consumed = 0;
         let mut count = 0;
@@ -59,6 +63,9 @@ impl SegmenterState<'_> {
         })
     }
     /// Emits the pending final segment using the unconsumed input suffix.
+    ///
+    /// Resolve emitted ranges with [`Segment::absolute_range`], using the
+    /// absolute position of `remaining_input` as its offset.
     pub fn finalize(&mut self, remaining_input: &str, output: &mut [Segment]) -> Result<usize> {
         let mut count = 0;
         let native_output = n::iree_tokenizer_segment_output_t {

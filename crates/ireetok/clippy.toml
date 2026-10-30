@@ -1,0 +1,4 @@
+# Keep the workspace's test assertion policy when linting the extracted crate.
+allow-unwrap-in-tests = true
+allow-expect-in-tests = true
+allow-panic-in-tests = true

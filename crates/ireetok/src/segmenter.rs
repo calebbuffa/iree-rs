@@ -225,6 +225,10 @@ impl Segmenter {
 }
 
 /// A half-open byte range emitted by a segmenter.
+///
+/// Streaming offsets are relative to the current input. A pending segment can
+/// begin before that input, represented by native unsigned wraparound. Use
+/// [`Self::absolute_range`] to reconstruct its range in the retained text.
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct Segment {
@@ -232,4 +236,15 @@ pub struct Segment {
     pub start: usize,
     /// Exclusive ending byte offset.
     pub end: usize,
+}
+
+impl Segment {
+    /// Resolves offsets relative to the current input's absolute byte position.
+    ///
+    /// Wrapping addition matches IREE's representation of pending segments that
+    /// begin in an earlier chunk. Retain the original text and use `str::get`
+    /// with the returned range to check bounds and UTF-8 boundaries.
+    pub fn absolute_range(self, input_offset: usize) -> std::ops::Range<usize> {
+        input_offset.wrapping_add(self.start)..input_offset.wrapping_add(self.end)
+    }
 }

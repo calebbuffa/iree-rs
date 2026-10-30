@@ -4,16 +4,12 @@ use ireetok::{
     Code, PreTokenizerFlags, RegexCompileFlags, RegexDfa, Result, Segment, Segmenter, SplitBehavior,
 };
 
-fn shift_segment(segment: Segment, offset: usize) -> Result<Segment> {
-    let start = segment
-        .start
-        .checked_add(offset)
-        .ok_or_else(|| ireetok::Error::new(Code::DataLoss, "segment start offset overflowed"))?;
-    let end = segment
-        .end
-        .checked_add(offset)
-        .ok_or_else(|| ireetok::Error::new(Code::DataLoss, "segment end offset overflowed"))?;
-    Ok(Segment { start, end })
+fn shift_segment(segment: Segment, offset: usize) -> Segment {
+    let range = segment.absolute_range(offset);
+    Segment {
+        start: range.start,
+        end: range.end,
+    }
 }
 
 fn segment_all(segmenter: &Segmenter, input: &str) -> Result<Vec<Segment>> {
@@ -30,7 +26,7 @@ fn segment_all(segmenter: &Segmenter, input: &str) -> Result<Vec<Segment>> {
         finalized[..finalized_count]
             .iter()
             .map(|&segment| shift_segment(segment, progress.consumed))
-            .collect::<Result<Vec<_>>>()?,
+            .collect::<Vec<_>>(),
     );
     Ok(segments)
 }
@@ -208,7 +204,7 @@ fn whitespace_streaming_tracks_pending_segments_and_offsets() -> Result<()> {
         finalized[..finalized_count]
             .iter()
             .map(|&segment| shift_segment(segment, progress.consumed))
-            .collect::<Result<Vec<_>>>()?,
+            .collect::<Vec<_>>(),
     );
 
     let text = ranges
@@ -319,6 +315,78 @@ fn literal_split_segmenter_matches_upstream_modes_and_inversion() -> Result<()> 
         ["abc", "abc"]
     );
 
+    Ok(())
+}
+
+#[test]
+fn split_pending_modes_keep_finalized_ranges_within_input() -> Result<()> {
+    for (behavior, invert, input, expected) in [
+        (
+            SplitBehavior::MergedWithNext,
+            false,
+            "a,b,c",
+            &["a", ",b", ",c"][..],
+        ),
+        (
+            SplitBehavior::Contiguous,
+            false,
+            "a,,b,c",
+            &["a", ",,", "b", ",", "c"][..],
+        ),
+        (
+            SplitBehavior::Isolated,
+            true,
+            "a,b,c",
+            &["a", ",", "b", ",", "c"][..],
+        ),
+    ] {
+        for segmenter in [
+            Segmenter::split_literal(",", behavior, invert)?,
+            Segmenter::split(
+                RegexDfa::compile(",", RegexCompileFlags::NONE)?,
+                behavior,
+                invert,
+            )?,
+        ] {
+            assert_eq!(
+                segment_text(&segmenter, input)?,
+                expected,
+                "{behavior:?}, invert={invert}"
+            );
+        }
+    }
+    Ok(())
+}
+
+#[test]
+fn split_pending_segments_resolve_across_chunks() -> Result<()> {
+    let input = "a,b,c";
+    for segmenter in [
+        Segmenter::split_literal(",", SplitBehavior::MergedWithNext, false)?,
+        Segmenter::split(
+            RegexDfa::compile(",", RegexCompileFlags::NONE)?,
+            SplitBehavior::MergedWithNext,
+            false,
+        )?,
+    ] {
+        let mut state = segmenter.state()?;
+        let mut output = [Segment::default(); 8];
+        let first = state.process(&input[..3], &mut output)?;
+        assert_eq!(first.consumed, 3);
+        assert_eq!(first.written, 1);
+        assert_eq!(output[0].absolute_range(0), 0..1);
+
+        let second = state.process(&input[first.consumed..], &mut output)?;
+        assert_eq!(second.consumed, 2);
+        assert_eq!(second.written, 1);
+        assert_eq!(output[0].absolute_range(first.consumed), 1..3);
+
+        let offset = first.consumed + second.consumed;
+        let written = state.finalize(&input[offset..], &mut output)?;
+        assert_eq!(written, 1);
+        assert_eq!(output[0].absolute_range(offset), 3..5);
+        assert!(!state.has_pending());
+    }
     Ok(())
 }
 

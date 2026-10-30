@@ -4,6 +4,24 @@
 //! post-processing, streaming, vocabularies, and tiktoken formats. Custom
 //! components use the safe traits in [`extension`]; [`native`] exposes the
 //! lower-level C API for advanced interoperability.
+//!
+//! ```
+//! use ireetok::Tokenizer;
+//!
+//! let tokenizer = Tokenizer::from_huggingface_json(r###"{
+//!   "model": {
+//!     "type": "WordPiece", "unk_token": "[UNK]",
+//!     "continuing_subword_prefix": "##", "max_input_chars_per_word": 100,
+//!     "vocab": {"[UNK]": 0, "hello": 1, "world": 2, "##s": 3}
+//!   },
+//!   "pre_tokenizer": {"type": "Whitespace"},
+//!   "decoder": {"type": "WordPiece", "prefix": "##", "cleanup": true}
+//! }"###)?;
+//! let ids = tokenizer.encode("hello worlds")?;
+//! assert_eq!(ids, [1, 2, 3]);
+//! assert_eq!(tokenizer.decode(&ids)?, "hello worlds");
+//! # Ok::<(), ireetok::Error>(())
+//! ```
 #![deny(missing_docs, clippy::all)]
 
 pub(crate) use iree_native as n;
