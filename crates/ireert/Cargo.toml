@@ -31,7 +31,7 @@ null = ["iree-native/null"]
 mpi = ["iree-native/mpi"]
 
 [dependencies]
-iree-native = { version = "0.1.0", path = "../iree-native", default-features = false }
+iree-native = { version = "0.1.0", default-features = false }
 memmap2 = "0.9"
 bytemuck = { version = "1", features = ["derive"] }
 

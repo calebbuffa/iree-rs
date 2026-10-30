@@ -11,7 +11,7 @@ publish = false
 
 [dependencies]
 thiserror = "2"
-iree-native = { version = "0.1.0", path = "../iree-native", default-features = false, features = [
+iree-native = { version = "0.1.0", default-features = false, features = [
     "compiler",
 ] }
 ireec = { version = "0.1.0", path = "../ireec" }

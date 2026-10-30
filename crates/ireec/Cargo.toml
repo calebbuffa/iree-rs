@@ -30,7 +30,7 @@ tools = ["iree-native/compiler-tools"]
 
 [dependencies]
 thiserror = "2"
-iree-native = { version = "0.1.0", path = "../iree-native", default-features = false, features = [
+iree-native = { version = "0.1.0", default-features = false, features = [
     "compiler",
 ] }
 

@@ -12,6 +12,9 @@ members = [
 ]
 resolver = "3"
 
+[patch.crates-io]
+iree-native = { path = "crates/iree-native" }
+
 [workspace.package]
 version = "0.1.0"
 edition = "2024"
