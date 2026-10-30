@@ -1,8 +1,8 @@
 //! HAL file CTS ports.
 
-#[path = "../../../tests/support/cts.rs"]
+#[path = "support/cts.rs"]
 mod cts;
-#[path = "support\\cts_buffer.rs"]
+#[path = "support/cts_buffer.rs"]
 mod cts_buffer;
 
 use cts::devices;

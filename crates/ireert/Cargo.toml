@@ -9,6 +9,11 @@ readme = "README.md"
 repository.workspace = true
 homepage.workspace = true
 documentation = "https://docs.rs/ireert"
+include = ["src/**", "tests/**", "Cargo.toml", "README.md", "LICENSE"]
+
+[package.metadata.docs.rs]
+features = ["io-parameters", "io-format-irpa", "io-format-gguf", "io-format-safetensors"]
+targets = ["x86_64-unknown-linux-gnu"]
 
 [features]
 default = ["cpu"]

@@ -1,9 +1,9 @@
 //! HAL buffer CTS ports; test panics surface assertion and setup failures.
 // Test-only panics surface CTS assertion and setup failures; they are not library behavior.
 
-#[path = "../../../tests/support/cts.rs"]
+#[path = "support/cts.rs"]
 mod cts;
-#[path = "support\\cts_buffer.rs"]
+#[path = "support/cts_buffer.rs"]
 mod cts_buffer;
 
 use cts::devices;

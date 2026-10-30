@@ -77,23 +77,17 @@ mod gguf {
     #[test]
     fn empty() {
         assert!(
-            parse(include_bytes!(
-                "../../../extern/iree/runtime/src/iree/io/formats/gguf/testdata/empty.gguf"
-            ))
-            .unwrap()
-            .is_empty()
+            parse(include_bytes!("fixtures/gguf/empty.gguf"))
+                .unwrap()
+                .is_empty()
         );
     }
 
     #[test]
     fn single_tensor_and_v2() {
         for bytes in [
-            &include_bytes!(
-                "../../../extern/iree/runtime/src/iree/io/formats/gguf/testdata/single.gguf"
-            )[..],
-            &include_bytes!(
-                "../../../extern/iree/runtime/src/iree/io/formats/gguf/testdata/single_v2.gguf"
-            )[..],
+            &include_bytes!("fixtures/gguf/single.gguf")[..],
+            &include_bytes!("fixtures/gguf/single_v2.gguf")[..],
         ] {
             let index = parse(bytes).unwrap();
             let entry = index.lookup("tensor0").unwrap();
@@ -106,10 +100,7 @@ mod gguf {
 
     #[test]
     fn multiple_tensors() {
-        let index = parse(include_bytes!(
-            "../../../extern/iree/runtime/src/iree/io/formats/gguf/testdata/multiple.gguf"
-        ))
-        .unwrap();
+        let index = parse(include_bytes!("fixtures/gguf/multiple.gguf")).unwrap();
         for (key, offset, length) in [
             ("tensor0", 448, 16),
             ("tensor1", 512, 8),
@@ -125,9 +116,7 @@ mod gguf {
 
     #[test]
     fn rejects_invalid_magic_version_and_truncated_tensor_table() {
-        let fixture = include_bytes!(
-            "../../../extern/iree/runtime/src/iree/io/formats/gguf/testdata/single.gguf"
-        );
+        let fixture = include_bytes!("fixtures/gguf/single.gguf");
 
         let mut invalid_magic = fixture.to_vec();
         invalid_magic[..4].copy_from_slice(b"NOPE");
@@ -181,30 +170,22 @@ mod irpa {
     #[test]
     fn empty() {
         assert!(
-            parse(include_bytes!(
-                "../../../extern/iree/runtime/src/iree/io/formats/irpa/testdata/empty.irpa"
-            ))
-            .unwrap()
-            .is_empty()
+            parse(include_bytes!("fixtures/irpa/empty.irpa"))
+                .unwrap()
+                .is_empty()
         );
     }
 
     #[test]
     fn single_and_multiple_parameters() {
-        let single = parse(include_bytes!(
-            "../../../extern/iree/runtime/src/iree/io/formats/irpa/testdata/single.irpa"
-        ))
-        .unwrap();
+        let single = parse(include_bytes!("fixtures/irpa/single.irpa")).unwrap();
         let entry = single.lookup("key0").unwrap();
         assert_eq!(entry.key, "key0");
         assert!(entry.metadata.is_empty());
         assert_eq!(entry.storage, ParameterStorage::File { offset: 192 });
         assert_eq!(entry.length, 16);
 
-        let multiple = parse(include_bytes!(
-            "../../../extern/iree/runtime/src/iree/io/formats/irpa/testdata/multiple.irpa"
-        ))
-        .unwrap();
+        let multiple = parse(include_bytes!("fixtures/irpa/multiple.irpa")).unwrap();
         for (key, offset, length) in [("key0", 320, 16), ("key1", 384, 5)] {
             let entry = multiple.lookup(key).unwrap();
             assert_eq!(entry.key, key);
@@ -216,10 +197,7 @@ mod irpa {
 
     #[test]
     fn mixed_file_and_splat_entries() {
-        let index = parse(include_bytes!(
-            "../../../extern/iree/runtime/src/iree/io/formats/irpa/testdata/mixed.irpa"
-        ))
-        .unwrap();
+        let index = parse(include_bytes!("fixtures/irpa/mixed.irpa")).unwrap();
         for (key, offset, length) in [("key0", 512, 16), ("key1", 576, 5)] {
             let entry = index.lookup(key).unwrap();
             assert!(entry.metadata.is_empty());
@@ -240,9 +218,7 @@ mod irpa {
 
     #[test]
     fn rejects_invalid_magic_and_segment_ranges() {
-        let fixture = include_bytes!(
-            "../../../extern/iree/runtime/src/iree/io/formats/irpa/testdata/single.irpa"
-        );
+        let fixture = include_bytes!("fixtures/irpa/single.irpa");
 
         let mut invalid_magic = fixture.to_vec();
         invalid_magic[..4].copy_from_slice(b"NOPE");
@@ -287,23 +263,23 @@ mod safetensors {
 
     #[test]
     fn empty() {
-        assert!(parse(include_bytes!("../../../extern/iree/runtime/src/iree/io/formats/safetensors/testdata/empty.safetensors")).unwrap().is_empty());
+        assert!(
+            parse(include_bytes!("fixtures/safetensors/empty.safetensors"))
+                .unwrap()
+                .is_empty()
+        );
     }
 
     #[test]
     fn single_and_multiple_tensors() {
-        let single = parse(include_bytes!(
-            "../../../extern/iree/runtime/src/iree/io/formats/safetensors/testdata/single.safetensors"
-        )).unwrap();
+        let single = parse(include_bytes!("fixtures/safetensors/single.safetensors")).unwrap();
         let entry = single.lookup("tensor0").unwrap();
         assert_eq!(entry.key, "tensor0");
         assert!(entry.metadata.is_empty());
         assert_eq!(entry.storage, ParameterStorage::File { offset: 72 });
         assert_eq!(entry.length, 16);
 
-        let multiple = parse(include_bytes!(
-            "../../../extern/iree/runtime/src/iree/io/formats/safetensors/testdata/multiple.safetensors"
-        )).unwrap();
+        let multiple = parse(include_bytes!("fixtures/safetensors/multiple.safetensors")).unwrap();
         for (key, offset, length) in [
             ("tensor0", 200, 16),
             ("tensor1", 216, 8),

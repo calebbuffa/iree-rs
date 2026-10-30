@@ -1,6 +1,6 @@
 //! HAL core CTS ports.
 
-#[path = "../../../tests/support/cts.rs"]
+#[path = "support/cts.rs"]
 mod cts;
 
 use cts::devices;
@@ -75,6 +75,7 @@ fn try_create_event(backend: &str, device: &ireert::hal::Device) -> ireert::Resu
 
 #[test]
 fn query_and_create_available_devices_by_id() -> ireert::Result<()> {
+    let _guard = cts::lock_test_devices();
     let registry = cts::registry()?;
     let pool = ProactorPool::shared()?;
     for info in registry.enumerate()? {
@@ -95,6 +96,7 @@ fn query_and_create_available_devices_by_id() -> ireert::Result<()> {
 
 #[test]
 fn query_and_create_available_devices_by_ordinal() -> ireert::Result<()> {
+    let _guard = cts::lock_test_devices();
     let registry = cts::registry()?;
     let pool = ProactorPool::shared()?;
     for info in registry.enumerate()? {
@@ -115,6 +117,7 @@ fn query_and_create_available_devices_by_ordinal() -> ireert::Result<()> {
 
 #[test]
 fn query_and_create_available_devices_by_path() -> ireert::Result<()> {
+    let _guard = cts::lock_test_devices();
     let registry = cts::registry()?;
     let pool = ProactorPool::shared()?;
     for info in registry.enumerate()? {

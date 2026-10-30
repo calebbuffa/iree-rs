@@ -2,7 +2,7 @@
 
 #[path = "support/cts_compile.rs"]
 mod cts_compile;
-#[path = "../../../tests/support/cts_exec.rs"]
+#[path = "../../ireert/tests/support/cts_exec.rs"]
 mod cts_exec;
 
 use cts_exec::{allocate_transfer_buffer, available_devices};

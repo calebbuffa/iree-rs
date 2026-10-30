@@ -1,6 +1,6 @@
 //! Compiler-backed HAL executable cache and reflection CTS ports.
 
-#[path = "../../../tests/support/cts.rs"]
+#[path = "../../ireert/tests/support/cts.rs"]
 mod cts;
 
 use cts::devices;

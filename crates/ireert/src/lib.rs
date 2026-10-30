@@ -9,6 +9,22 @@
 //! Applications choose their own input/output types and calling conventions.
 //! VM bytecode and executable plugins may run native code, so load only trusted
 //! artifacts.
+//!
+//! # Example
+//!
+//! Create a VM instance and an owned byte buffer without a compiler or model:
+//!
+//! ```
+//! use ireert::vm::{Buffer, BufferAccess, Instance};
+//!
+//! let instance = Instance::new()?;
+//! let mut buffer = Buffer::new(&instance, BufferAccess::MUTABLE, 4, 1)?;
+//! buffer.write(0, &[1, 2, 3, 4])?;
+//! let mut bytes = [0; 4];
+//! buffer.read(0, &mut bytes)?;
+//! assert_eq!(bytes, [1, 2, 3, 4]);
+//! # Ok::<(), ireert::Error>(())
+//! ```
 #![deny(missing_docs, clippy::all)]
 
 pub mod asynchronous;

@@ -2,7 +2,7 @@
 
 #![cfg(feature = "cpu")]
 
-#[path = "../../../tests/support/cts.rs"]
+#[path = "support/cts.rs"]
 mod cts;
 
 use ireert::{

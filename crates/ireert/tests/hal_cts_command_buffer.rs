@@ -1,6 +1,6 @@
 //! Rust ports of representative upstream HAL command-buffer CTS cases.
 
-#[path = "../../../tests/support/cts_exec.rs"]
+#[path = "support/cts_exec.rs"]
 mod cts_exec;
 
 use cts_exec::{allocate_transfer_buffer, available_devices};
