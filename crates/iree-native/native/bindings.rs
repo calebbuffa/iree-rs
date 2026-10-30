@@ -50,10 +50,35 @@ pub fn generate(
     features: &Configuration,
     target: &str,
 ) -> Result<()> {
+    generate_impl(out, installed, features, target, false, &[])
+}
+
+pub fn generate_documentation(
+    out: &Path,
+    installed: &Installation,
+    target: &str,
+    includes: &[String],
+) -> Result<()> {
+    let features = Configuration::new(super::documentation::features(target)?);
+    generate_impl(out, installed, &features, target, true, includes)
+}
+
+fn generate_impl(
+    out: &Path,
+    installed: &Installation,
+    features: &Configuration,
+    target: &str,
+    documentation: bool,
+    includes: &[String],
+) -> Result<()> {
     let build = &installed.build;
     let flags_available = installed.has_static_symbols(&["iree_flags_parse_checked"])?;
     let native = Path::new(env!("CARGO_MANIFEST_DIR")).join("native");
     let mut arguments = fs::read_to_string(build.join("iree-bindgen-args.txt"))?;
+    for include in includes {
+        arguments.push('\n');
+        arguments.push_str(include);
+    }
     if features.has("bare-metal") {
         // Upstream emits this as a compile option, not a target definition.
         // Keep both generated layouts and C forwarders on the same no-lock ABI.
@@ -327,13 +352,53 @@ pub fn generate(
             "compiler" => "raw_compiler".into(),
             _ => family.replace('-', "_"),
         };
-        index.push_str(&format!("#[path = \"{family}.rs\"]\npub mod {module};\n"));
+        let availability = if documentation {
+            match family {
+                "base" => String::new(),
+                "local" => {
+                    "any(feature = \"cpu\", feature = \"local-sync\", feature = \"local-task\")"
+                        .into()
+                }
+                "task" => {
+                    "any(feature = \"task\", feature = \"cpu\", feature = \"local-task\")".into()
+                }
+                "metal" => "all(feature = \"metal\", target_vendor = \"apple\")".into(),
+                "amdgpu" => "all(feature = \"amdgpu\", target_os = \"linux\")".into(),
+                "webgpu" => "all(feature = \"webgpu\", target_arch = \"wasm32\")".into(),
+                name => format!("feature = {name:?}"),
+            }
+        } else {
+            String::new()
+        };
+        let attribute = if availability.is_empty() {
+            String::new()
+        } else {
+            format!("#[cfg_attr(docsrs, doc(cfg({availability})))]\n")
+        };
+        index.push_str(&format!(
+            "{attribute}#[path = \"{family}.rs\"]\npub mod {module};\n"
+        ));
         for name in &exports {
             if name.starts_with("__") && !root_helpers.insert(name.clone()) {
                 continue;
             }
             let visibility = if name.starts_with("__") { "" } else { "pub " };
-            index.push_str(&format!("{visibility}use {module}::{name};\n"));
+            let extra_availability = if documentation {
+                documentation_availability(name)
+            } else {
+                None
+            };
+            let extra_attribute = extra_availability.map_or_else(String::new, |feature| {
+                format!("#[cfg_attr(docsrs, doc(cfg(feature = {feature:?})))]\n")
+            });
+            let platform_attribute = if documentation && name == "iree_native_load_compiler" {
+                "#[cfg_attr(docsrs, doc(cfg(target_env = \"msvc\")))]\n"
+            } else {
+                ""
+            };
+            index.push_str(&format!(
+                "{attribute}{extra_attribute}{platform_attribute}{visibility}use {module}::{name};\n"
+            ));
         }
         shared.insert(family, exports);
         tests.push_str(&format!("#[test]\nfn link_{module}() {{\n"));
@@ -350,8 +415,15 @@ pub fn generate(
     }
     fs::write(
         out.join("bindings.rs"),
-        format!("{index}\n#[cfg(test)] mod link_tests;\n"),
+        if documentation {
+            index
+        } else {
+            format!("{index}\n#[cfg(test)] mod link_tests;\n")
+        },
     )?;
+    if documentation {
+        return Ok(());
+    }
     let binding_source = clang
         .iter()
         .filter_map(|argument| argument.strip_prefix("-I"))
@@ -424,4 +496,41 @@ pub fn generate(
     }
     compiler.compile("iree_native_inline");
     Ok(())
+}
+
+fn documentation_availability(name: &str) -> Option<&'static str> {
+    if name.starts_with("iree_hal_mpi_") || name.starts_with("IREE_HAL_MPI_") {
+        Some("mpi")
+    } else if name.starts_with("iree_io_parameter_index_provider")
+        || name.starts_with("iree_io_parameter_provider")
+        || name.starts_with("iree_io_parameters_")
+        || name.starts_with("iree_io_parameter_module_")
+        || name.starts_with("iree_io_parameters_module_")
+    {
+        Some("io-parameters")
+    } else if name.starts_with("iree_io_parameter_index")
+        || name.starts_with("iree_io_parameter_")
+        || name.starts_with("iree_io_scope_map")
+    {
+        Some("io-index")
+    } else if name.starts_with("iree_io_build_irpa") || name.starts_with("iree_io_parse_irpa") {
+        Some("io-format-irpa")
+    } else if name.starts_with("iree_io_parse_gguf") {
+        Some("io-format-gguf")
+    } else if name.starts_with("iree_io_parse_safetensors") {
+        Some("io-format-safetensors")
+    } else if [
+        "ireeCompilerRunMain",
+        "ireeOptRunMain",
+        "ireeMlirLspServerRunMain",
+        "ireeCompilerRunLldMain",
+        "ireeLinkRunMain",
+        "ireeReduceRunMain",
+    ]
+    .contains(&name)
+    {
+        Some("compiler-tools")
+    } else {
+        None
+    }
 }

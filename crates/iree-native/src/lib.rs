@@ -5,6 +5,7 @@
 //! provide shared status handling for the higher-level runtime crates.
 
 #![no_std]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 #[cfg(any(panic = "unwind", test, not(target_os = "none")))]
 extern crate std;
 
@@ -36,7 +37,10 @@ pub use generated::*;
 
 extern crate alloc;
 pub mod abi;
-#[cfg(feature = "compiler")]
+#[cfg(all(
+    feature = "compiler",
+    any(not(iree_native_docs), not(target_arch = "wasm32"))
+))]
 pub mod compiler;
 mod error;
 pub use error::{Code, Error, Result, Status, StatusPayload, callback_status, consume, contain};

@@ -12,6 +12,8 @@ use woodshed::{Cache, CmakeBuild, MsvcRuntime, Toolchain};
 mod bindings;
 #[path = "native/config.rs"]
 mod config;
+#[path = "native/documentation.rs"]
+mod documentation;
 #[path = "native/manifest.rs"]
 mod manifest;
 #[path = "native/workspace.rs"]
@@ -35,6 +37,9 @@ fn main() -> BuildResult<()> {
     }
     for variable in [
         "DOCS_RS",
+        "IREE_NATIVE_DOCS_SNAPSHOT_DIR",
+        "IREE_NATIVE_DOCS_TARGET",
+        "IREE_NATIVE_DOCS_CLANG_ARGS",
         "IREE_NATIVE_INSPECT_DIR",
         "IREE_NATIVE_DIR",
         "IREE_NATIVE_CACHE_DIR",
@@ -65,15 +70,8 @@ fn main() -> BuildResult<()> {
     ] {
         println!("cargo:rerun-if-env-changed={variable}");
     }
-    if env::var("DOCS_RS").is_ok_and(|value| value == "1") {
-        return Err(
-            "IREE: hosted docs.rs builds are unsupported: documentation requires the \
-         native target toolchain, libclang, and pinned native sources or a compatible \
-         IREE_NATIVE_DIR installation. Run cargo doc locally or in native CI with DOCS_RS \
-         unset; see crates/iree-native/README.md#documentation."
-                .into(),
-        );
-    }
+    println!("cargo:rustc-check-cfg=cfg(docsrs)");
+    println!("cargo:rustc-check-cfg=cfg(iree_native_docs)");
     let root = PathBuf::from(
         env::var_os("CARGO_MANIFEST_DIR").ok_or("Cargo CARGO_MANIFEST_DIR is missing")?,
     );
@@ -104,6 +102,16 @@ fn main() -> BuildResult<()> {
         format!("/// IREE release used for the native libraries and generated bindings.\npub const IREE_VERSION: &str = {iree_version:?};\n"),
     )
     .context(format!("write generated IREE version in {}", out.display()))?;
+    if env::var("DOCS_RS").is_ok_and(|value| value == "1") {
+        documentation::stage(&root, &out, iree_version, &target)?;
+        println!("cargo:rustc-cfg=iree_native_docs");
+        println!("cargo:rustc-env=IREE_COMPILER_BIN_DIR=unavailable in documentation-only builds");
+        println!("cargo:rustc-env=IREE_COMPILER_DEPLOYMENT_ID=documentation-only");
+        println!(
+            "cargo:warning=IREE: using documentation-only bindings; no native libraries are built or linked"
+        );
+        return Ok(());
+    }
     if target.contains("msvc")
         && let Some(tool) = cc::windows_registry::find_tool(&target, "cl.exe")
     {
@@ -142,18 +150,7 @@ fn main() -> BuildResult<()> {
         ))?;
         return generate_and_link(&out, &installed, &features, &target);
     }
-    let cache = match env::var_os("IREE_NATIVE_CACHE_DIR") {
-        Some(path) => {
-            let path = PathBuf::from(path);
-            Cache::at(if path.is_absolute() {
-                path
-            } else {
-                root.join(path)
-            })
-            .offline(env::var("WOODSHED_OFFLINE").is_ok_and(|value| value == "1"))
-        }
-        None => Cache::discover().context("discover Woodshed cache")?,
-    };
+    let cache = native_cache(&root)?;
     // Windows verbatim paths from canonicalize() make emcc derive a sysroot
     // that Clang cannot search. CMake can resolve symlinks from an absolute path.
     let toolchain_file = env::var_os("IREE_NATIVE_TOOLCHAIN_FILE")
@@ -485,6 +482,60 @@ fn generate_and_link(
     .context("report binding progress")?;
     bindings::generate(out, installed, features, target)
         .context("generate IREE bindings (install libclang or set LIBCLANG_PATH)")?;
+    if let Some(destination) = env::var_os("IREE_NATIVE_DOCS_SNAPSHOT_DIR") {
+        let destination = PathBuf::from(destination);
+        if !destination.is_absolute() {
+            return Err("IREE_NATIVE_DOCS_SNAPSHOT_DIR must be an absolute path".into());
+        }
+        if !features.uses_compiler() {
+            return Err(
+                "documentation snapshots require the compiler feature and its native installation"
+                    .into(),
+            );
+        }
+        let root = PathBuf::from(
+            env::var_os("CARGO_MANIFEST_DIR").ok_or("Cargo CARGO_MANIFEST_DIR is missing")?,
+        );
+        let documentation_target = env::var("IREE_NATIVE_DOCS_TARGET").unwrap_or(target.into());
+        documentation::features(&documentation_target)?;
+        let project = Project::load(root.join("native").join("woodshed.toml"))?;
+        let locked = project.locked()?;
+        let cache = native_cache(&root)?;
+        let headers = destination.join("header-inputs");
+        let mut includes = vec![format!("-I{}", headers.display())];
+        match env::var("IREE_NATIVE_DOCS_CLANG_ARGS") {
+            Ok(arguments) => includes
+                .extend(serde_json::from_str::<Vec<String>>(&arguments).context(
+                "IREE_NATIVE_DOCS_CLANG_ARGS must be a JSON string array of target SDK arguments",
+            )?),
+            Err(env::VarError::NotPresent) => {}
+            Err(error) => return Err(format!("read IREE_NATIVE_DOCS_CLANG_ARGS: {error}").into()),
+        }
+        for name in ["hip_build_deps", "hsa_runtime_headers"] {
+            let source = cache.source(
+                locked
+                    .sources
+                    .get(name)
+                    .ok_or("missing documentation header pin")?,
+            )?;
+            cache.mirror_to(
+                &source,
+                &headers.join("third_party").join(name.replace('_', "-")),
+            )?;
+        }
+        fs::create_dir_all(&destination).context("create documentation snapshot directory")?;
+        let destination = destination.join(&documentation_target);
+        fs::create_dir_all(&destination)
+            .context("create target documentation snapshot directory")?;
+        bindings::generate_documentation(&destination, installed, &documentation_target, &includes)
+            .context(format!("generate documentation for {documentation_target}; provide its real SDK/sysroot via IREE_NATIVE_DOCS_CLANG_ARGS"))?;
+        documentation::record(
+            &root,
+            &destination,
+            &installed.version,
+            &documentation_target,
+        )?;
+    }
     copy_bindings_for_inspection(out, target, features)?;
     installed.link(out, features)?;
     Ok(())
@@ -493,6 +544,21 @@ fn generate_and_link(
 fn report_plan(message: &str) -> BuildResult<()> {
     println!("cargo:warning=IREE: {}", message.replace(['\r', '\n'], " "));
     woodshed::progress::report(&format!("IREE: {message}")).context("report native build plan")
+}
+
+fn native_cache(root: &Path) -> BuildResult<Cache> {
+    Ok(match env::var_os("IREE_NATIVE_CACHE_DIR") {
+        Some(path) => {
+            let path = PathBuf::from(path);
+            Cache::at(if path.is_absolute() {
+                path
+            } else {
+                root.join(path)
+            })
+            .offline(env::var("WOODSHED_OFFLINE").is_ok_and(|value| value == "1"))
+        }
+        None => Cache::discover().context("discover Woodshed cache")?,
+    })
 }
 
 fn cuda_sdk() -> Option<String> {
