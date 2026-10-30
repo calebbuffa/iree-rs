@@ -9,6 +9,33 @@
 //! construction or Rust-authored passes are needed. Compiler output is
 //! executable code: compile and run only trusted input. See the crate README
 //! for feature selection and native deployment requirements.
+//!
+//! # Example
+//!
+//! Compile a scalar function to VM bytecode using the portable VMVX backend:
+//!
+//! ```
+//! use ireec::{Compiler, Device, Options, Output, Pipeline, Target};
+//!
+//! let compiler = Compiler::new()?;
+//! let mut session = compiler.session()?;
+//! session.configure(
+//!     &Options::default()
+//!         .with_device(Device::Alias("local".into()))
+//!         .with_target(Target::Vmvx),
+//! )?;
+//! let source = session.source_buffer(
+//!     "example.mlir",
+//!     b"func.func @double(%x: i32) -> i32 { %0 = arith.addi %x, %x : i32 return %0 : i32 }",
+//! )?;
+//! let mut invocation = session.invocation()?;
+//! invocation.parse_source(source)?;
+//! invocation.pipeline(Pipeline::Std)?;
+//! let mut output = Output::memory(&compiler)?;
+//! invocation.output_vm_bytecode(&mut output)?;
+//! assert!(!output.bytes()?.is_empty());
+//! # Ok::<(), ireec::Error>(())
+//! ```
 #![deny(missing_docs, clippy::all)]
 
 mod global_options;

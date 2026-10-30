@@ -9,6 +9,11 @@ readme = "README.md"
 repository.workspace = true
 homepage.workspace = true
 documentation = "https://docs.rs/ireec"
+include = ["src/**", "tests/**", "Cargo.toml", "README.md", "LICENSE"]
+
+[package.metadata.docs.rs]
+features = ["target-llvm-cpu", "input-stablehlo", "tools"]
+targets = ["x86_64-unknown-linux-gnu"]
 
 [features]
 target-llvm-cpu = ["iree-native/target-llvm-cpu"]

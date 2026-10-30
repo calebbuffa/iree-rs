@@ -181,3 +181,64 @@ fn compilation_is_deterministic() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(a, b);
     Ok(())
 }
+
+#[test]
+fn ir_text_and_bytecode_round_trip_through_fresh_invocations()
+-> Result<(), Box<dyn std::error::Error>> {
+    let compiler = Compiler::new()?;
+    let session = session()?;
+    let mut invocation = session.invocation()?;
+    invocation.parse_source(session.source_buffer("input.mlir", MODULE.as_bytes())?)?;
+    let mut text = Output::memory(&compiler)?;
+    invocation.output_ir(&mut text)?;
+    let text_bytes = text.bytes()?.to_vec();
+    assert!(std::str::from_utf8(&text_bytes)?.contains("func.func @add"));
+    let mut bytecode = Output::memory(&compiler)?;
+    invocation.output_ir_bytecode(&mut bytecode, None)?;
+    let bytecode_bytes = bytecode.bytes()?.to_vec();
+    assert!(bytecode_bytes.starts_with(b"ML\xefR"));
+    for input in [&text_bytes, &bytecode_bytes] {
+        let mut reparsed = session.invocation()?;
+        reparsed.parse_source(session.source_buffer("roundtrip.mlir", input)?)?;
+        let mut restored = Output::memory(&compiler)?;
+        reparsed.output_ir(&mut restored)?;
+        assert_eq!(restored.bytes()?, text_bytes);
+        reparsed.pipeline(Pipeline::Std)?;
+        let mut vmfb = Output::memory(&compiler)?;
+        reparsed.output_vm_bytecode(&mut vmfb)?;
+        assert!(is_vmfb(vmfb.bytes()?));
+    }
+    Ok(())
+}
+
+#[cfg(feature = "target-llvm-cpu")]
+#[test]
+fn llvm_cpu_target_compiles_tensor_module() -> Result<(), Box<dyn std::error::Error>> {
+    let mut session = Compiler::new()?.session()?;
+    session.configure(
+        &Options::default()
+            .with_device(Device::Alias("local".into()))
+            .with_target(Target::LlvmCpu {
+                triple: None,
+                cpu: Some("generic".into()),
+                cpu_features: None,
+            }),
+    )?;
+    assert!(is_vmfb(&compile_vmfb(&session, MODULE.as_bytes())?));
+    Ok(())
+}
+
+#[cfg(feature = "input-stablehlo")]
+#[test]
+fn stablehlo_input_compiles_to_portable_bytecode() -> Result<(), Box<dyn std::error::Error>> {
+    let mut session = session()?;
+    session.configure(&Options::default().with_input_type(ireec::InputType::StableHlo))?;
+    let input = br#"
+func.func @add(%a: tensor<4xf32>, %b: tensor<4xf32>) -> tensor<4xf32> {
+  %0 = stablehlo.add %a, %b : tensor<4xf32>
+  return %0 : tensor<4xf32>
+}
+"#;
+    assert!(is_vmfb(&compile_vmfb(&session, input)?));
+    Ok(())
+}
