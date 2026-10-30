@@ -496,21 +496,28 @@ fn generate_and_link(
         let root = PathBuf::from(
             env::var_os("CARGO_MANIFEST_DIR").ok_or("Cargo CARGO_MANIFEST_DIR is missing")?,
         );
-        let documentation_target = env::var("IREE_NATIVE_DOCS_TARGET").unwrap_or(target.into());
+        let documentation_target = match env::var("IREE_NATIVE_DOCS_TARGET") {
+            Ok(value) => value,
+            Err(env::VarError::NotPresent) => target.into(),
+            Err(error) => return Err(format!("read IREE_NATIVE_DOCS_TARGET: {error}").into()),
+        };
         documentation::features(&documentation_target)?;
         let project = Project::load(root.join("native").join("woodshed.toml"))?;
         let locked = project.locked()?;
         let cache = native_cache(&root)?;
         let headers = destination.join("header-inputs");
         let mut includes = vec![format!("-I{}", headers.display())];
-        match env::var("IREE_NATIVE_DOCS_CLANG_ARGS") {
-            Ok(arguments) => includes
-                .extend(serde_json::from_str::<Vec<String>>(&arguments).context(
+        let sdk_arguments = match env::var("IREE_NATIVE_DOCS_CLANG_ARGS") {
+            Ok(arguments) => serde_json::from_str::<Vec<String>>(&arguments).context(
                 "IREE_NATIVE_DOCS_CLANG_ARGS must be a JSON string array of target SDK arguments",
-            )?),
-            Err(env::VarError::NotPresent) => {}
+            )?,
+            Err(env::VarError::NotPresent) => Vec::new(),
             Err(error) => return Err(format!("read IREE_NATIVE_DOCS_CLANG_ARGS: {error}").into()),
+        };
+        if documentation_target != target && sdk_arguments.is_empty() {
+            return Err(format!("cross-target documentation for {documentation_target} requires real destination SDK arguments in IREE_NATIVE_DOCS_CLANG_ARGS").into());
         }
+        includes.extend(sdk_arguments);
         for name in ["hip_build_deps", "hsa_runtime_headers"] {
             let source = cache.source(
                 locked
