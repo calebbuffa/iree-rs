@@ -498,6 +498,12 @@ fn generate_impl(
         compiler.flag("/Zc:preprocessor");
     } else {
         compiler.flag("-std=c11");
+        if target.contains("linux") || target.contains("android") {
+            // Upstream futex.h uses timespec without including time.h; strict
+            // C11 also hides glibc's syscall declaration without GNU extensions.
+            compiler.define("_GNU_SOURCE", None);
+            compiler.flag("-include").flag("time.h");
+        }
     }
     compiler.compile("iree_native_inline");
     Ok(())
