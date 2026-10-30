@@ -37,7 +37,7 @@ bytemuck = { version = "1", features = ["derive"] }
 
 [dev-dependencies]
 proptest = "1"
-ireec = { path = "../ireec" }
+ireec = { version = "0.1.0", path = "../ireec" }
 
 [lints]
 workspace = true
