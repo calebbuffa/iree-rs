@@ -314,6 +314,10 @@ fn upstream_regex_replacement_covers_whitespace_edges_unicode_and_expansion() ->
             "{input:?}"
         );
     }
+    assert_eq!(
+        normalize_chunks(&collapse_spaces, &["a ", " b"])?,
+        b"a b"
+    );
 
     let collapse_whitespace = Normalizer::regex_replace(r"\s+", " ")?;
     for (input, expected) in [
@@ -333,6 +337,10 @@ fn upstream_regex_replacement_covers_whitespace_edges_unicode_and_expansion() ->
             "{input:?}"
         );
     }
+    assert_eq!(
+        normalize_chunks(&collapse_whitespace, &["a \t", "\n b"])?,
+        b"a b"
+    );
 
     let expand_whitespace = Normalizer::regex_replace(r"\s", "___")?;
     assert_eq!(normalize(&expand_whitespace, "a b")?, b"a___b");
