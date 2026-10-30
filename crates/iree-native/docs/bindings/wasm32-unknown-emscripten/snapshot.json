@@ -1,0 +1,30 @@
+{
+  "version": "3.14.0",
+  "generation_target": "wasm32-unknown-emscripten",
+  "inputs": {
+    "CMakeLists.txt": "5d3ed50eeea8753d97fc18e97b6c41b820c1732185f14fc1d668595e6e9f4ec7",
+    "binding_policy.rs": "d4e8c824988e261a5fe2c0c4b4962808eaace86a13ecb48e36c42c4064e30eea",
+    "binding_support.rs": "c9e0b428ecb4aa66fbab96686ad677ebbeeade87159716d601c6ed4f5757b5c4",
+    "bindings.rs": "55bf49c348b6e2f620afe6ed08383b5178de491768d312f8f3c6adc3748e19fd",
+    "config.rs": "42e4dcad25433b4f067818d93c93f36c793d27713aed9d70c5bb6375bd4d60bc",
+    "configuration.cmake": "82e4878d93952da451d02ec03bf2bc12dc3874561d34fcb58e2802ee558e3682",
+    "cxx-runtime.cmake": "e1e0ab3eb3192e9bb8b85734b9c65265ac7fd43bd9767645f551399acd788703",
+    "installation.cmake": "9fec248c11268d2e871a3fca06a4e2e9d4b6743ac15062cdda3692c060abe3f9",
+    "manifest.rs": "feb05c6e326edd55ef19a126bac4464b453a00590d69fd712f63c50f8b9f9938",
+    "targets.cmake": "ea2737cec189753e7ca831be15625ffb3c9b73de6693ed6ebbc1c67557bb1691",
+    "woodshed.lock": "aa40890f8f55e02cbf08bd4c851b8a32bb943aa598fb7127c60c94d5f3ac69cf",
+    "woodshed.toml": "8f4db0c0945795ec93807761cabcaf8ba9b475e840a83ff636eeb5f84b19b658",
+    "workspace.rs": "b27b145b158dab8027a59bfbfce40cdae571372cea24dd5e54d4c0339cbbb2a9",
+    "wrapper.h": "ef395320c5068669796d2b251d1c899c2cba7483c84e8943afe14ded59c75c97"
+  },
+  "files": {
+    "base.rs": "068f05329811062b457f8fe56aebf74f79285d0c2f323fc2c0ea97a03ff68c60",
+    "bindings.rs": "91abb3bbdea7d97857419b3c0979b1698e2570d0c114cdaaefa65a7ce3d248a3",
+    "local-sync.rs": "91091628a52441434d3b516d3badf8d056f12bed0166c2b43422878123dac82e",
+    "local.rs": "5b4be8e619c229505fb81cfe3bd03d7ea0dea04263a2fe6bc0f2e7013c33d04b",
+    "null.rs": "c8dd95b596175690d67979266e3caf0caff73fbc6348d5083ff66c793ea6556d",
+    "tokenizer.rs": "05272be86d2534b7620ac5f22afde6400cf884ba3e3f0911def753e3f7f0d340",
+    "vulkan.rs": "d4b37f42ba75cfc1e95dfeec93e78e8e90bda2693353c11599a784e2c7a8c211",
+    "webgpu.rs": "0a0a7a2f3adabb0dac3a6e28ed068a13b660e473c57bcdeafca09fa88f35f1b5"
+  }
+}

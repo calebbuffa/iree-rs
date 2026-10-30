@@ -1,0 +1,34 @@
+{
+  "version": "3.14.0",
+  "generation_target": "x86_64-pc-windows-msvc",
+  "inputs": {
+    "CMakeLists.txt": "5d3ed50eeea8753d97fc18e97b6c41b820c1732185f14fc1d668595e6e9f4ec7",
+    "binding_policy.rs": "d4e8c824988e261a5fe2c0c4b4962808eaace86a13ecb48e36c42c4064e30eea",
+    "binding_support.rs": "c9e0b428ecb4aa66fbab96686ad677ebbeeade87159716d601c6ed4f5757b5c4",
+    "bindings.rs": "55bf49c348b6e2f620afe6ed08383b5178de491768d312f8f3c6adc3748e19fd",
+    "config.rs": "42e4dcad25433b4f067818d93c93f36c793d27713aed9d70c5bb6375bd4d60bc",
+    "configuration.cmake": "82e4878d93952da451d02ec03bf2bc12dc3874561d34fcb58e2802ee558e3682",
+    "cxx-runtime.cmake": "e1e0ab3eb3192e9bb8b85734b9c65265ac7fd43bd9767645f551399acd788703",
+    "installation.cmake": "9fec248c11268d2e871a3fca06a4e2e9d4b6743ac15062cdda3692c060abe3f9",
+    "manifest.rs": "feb05c6e326edd55ef19a126bac4464b453a00590d69fd712f63c50f8b9f9938",
+    "targets.cmake": "ea2737cec189753e7ca831be15625ffb3c9b73de6693ed6ebbc1c67557bb1691",
+    "woodshed.lock": "aa40890f8f55e02cbf08bd4c851b8a32bb943aa598fb7127c60c94d5f3ac69cf",
+    "woodshed.toml": "8f4db0c0945795ec93807761cabcaf8ba9b475e840a83ff636eeb5f84b19b658",
+    "workspace.rs": "b27b145b158dab8027a59bfbfce40cdae571372cea24dd5e54d4c0339cbbb2a9",
+    "wrapper.h": "ef395320c5068669796d2b251d1c899c2cba7483c84e8943afe14ded59c75c97"
+  },
+  "files": {
+    "base.rs": "5d5208c8587c7e4ba08fecf1f7eec283ec8551d452b2e11eac9dc659a712b6bc",
+    "bindings.rs": "5b5ff6bcb07118dcac28e3e19c85ba9b77e02bb33da6d71c9d8cf1f88cd9ad46",
+    "compiler.rs": "00ff1408e201619ac69f72fc6670fa29426861cec3a6c3ec57b816e080f70d85",
+    "cuda.rs": "0904c8d1e8e5bae6839e143a8ca63aedddc0747126b613e2c54b21b5e4be97d6",
+    "hip.rs": "25531475d368dbdf9ad2d4c31dc17ed687af86d75b527446d4a00ff03a3835e9",
+    "local-sync.rs": "3452883793cad804fc2e92e3264224499e6f14f19a53158ddd43cbdcfc9cbb06",
+    "local-task.rs": "3184db928849466ca912448435c20e38ea74d50a46eda9591d23d8083658e71b",
+    "local.rs": "4cec6ed8dc1285221dd2b23b039b02efbc6a54b462ba6615060b7279258298b0",
+    "null.rs": "51b2590f6b3908e5fc6df26bc4485c599e9c4521853a3c54baec76bb465855d3",
+    "task.rs": "df42488364f82dcd3302e41951325d3aad159cf79d5c96e4ecf962b390883148",
+    "tokenizer.rs": "5cf1c3806661dc82d9a3bf1551b5251d4e2f22ed32509a9173afb56d5be27753",
+    "vulkan.rs": "95e11fa28fa67b7d8642b0207d887926c30da2eec0f914a26557fbf0cd89dd5f"
+  }
+}
