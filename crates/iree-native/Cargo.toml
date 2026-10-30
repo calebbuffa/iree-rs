@@ -1,0 +1,109 @@
+[package]
+name = "iree-native"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license = "Apache-2.0 WITH LLVM-exception"
+description = "C API bindings for IREE's compiler and runtime"
+readme = "README.md"
+repository.workspace = true
+homepage.workspace = true
+documentation = "https://github.com/calebbuffa/iree-rs/blob/main/crates/iree-native/README.md"
+links = "iree_runtime"
+include = [
+    "src/**",
+    "native/**",
+    "!native/**/*.pin.lock",
+    "build.rs",
+    "Cargo.toml",
+    "README.md",
+    "LICENSE",
+    "LICENSE-LLVM-EXCEPTION",
+    "NOTICE",
+]
+
+[lib]
+name = "iree_native"
+
+[features]
+default = ["cpu"]
+cpu = ["local-sync", "local-task"]
+bare-metal = ["local-sync"]
+local-sync = []
+local-task = ["task"]
+task = []
+tokenizer = []
+compiler-tools = []
+mpi = []
+vulkan = []
+cuda = []
+hip = []
+amdgpu = []
+metal = []
+null = []
+webgpu = []
+io-index = []
+io-parameters = ["io-index"]
+io-format-irpa = ["io-index"]
+io-format-gguf = ["io-index"]
+io-format-safetensors = ["io-index"]
+compiler = ["input-stablehlo"]
+target-llvm-cpu = ["compiler"]
+target-vulkan = ["compiler"]
+target-cuda = ["compiler"]
+target-rocm = ["compiler"]
+target-metal = ["compiler"]
+target-webgpu = ["compiler"]
+target-wasm = ["target-llvm-cpu"]
+llvm-aarch64 = ["target-llvm-cpu"]
+llvm-arm = ["target-llvm-cpu"]
+llvm-riscv = ["target-llvm-cpu"]
+llvm-x86 = ["target-llvm-cpu"]
+llvm-webassembly = ["target-wasm"]
+input-stablehlo = []
+input-tosa = ["compiler"]
+input-torch = ["compiler"]
+
+[build-dependencies]
+object = { version = "0.37", default-features = false, features = [
+    "archive",
+    "read_core",
+    "std",
+] }
+prettyplease = "0.2"
+bindgen = { version = "=0.72.1", features = ["experimental"] }
+syn = { version = "2", default-features = false, features = [
+    "clone-impls",
+    "full",
+    "parsing",
+    "printing",
+    "visit-mut",
+] }
+cc = "1"
+sha2 = "0.10"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+woodshed = { version = "0.4.0", features = ["cmake", "zip", "git"] }
+
+[dev-dependencies]
+proptest = "1"
+cc = "1"
+object = { version = "0.37", default-features = false, features = [
+    "archive",
+    "read_core",
+    "std",
+] }
+prettyplease = "0.2"
+syn = { version = "2", default-features = false, features = [
+    "clone-impls",
+    "full",
+    "parsing",
+    "printing",
+    "visit-mut",
+] }
+sha2 = "0.10"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[lints]
+workspace = true

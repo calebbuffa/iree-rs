@@ -1,0 +1,202 @@
+[package]
+name = "iree-samples"
+description = "Ports of IREE's upstream samples (extern/iree/samples) to the Rust API"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+autoexamples = false
+autotests = false
+autobins = false
+
+[features]
+default = ["local-task"]
+local-sync = ["ireert/local-sync"]
+local-task = ["ireert/local-task"]
+io-parameters = ["ireert/io-parameters"]
+vulkan = ["ireert/vulkan", "ireec/target-vulkan"]
+cuda = ["ireert/cuda", "ireec/target-cuda"]
+llvm-cpu = ["ireec/target-llvm-cpu"]
+stablehlo = ["ireec/input-stablehlo"]
+tokenizer = ["dep:ireetok"]
+vulkan-compiler = ["ireec/target-vulkan"]
+
+[dependencies]
+ireert = { path = "../crates/ireert" }
+ireec = { path = "../crates/ireec" }
+iree-sample-dynamic-module = { path = "custom_module/dynamic-module" }
+image = { version = "0.25", default-features = false, features = ["png"] }
+ireetok = { path = "../crates/ireetok", optional = true }
+
+[lints]
+workspace = true
+
+# Every example sets `test = true` and wraps `main` in a `#[test]`, so
+# `cargo test -p iree-samples --examples` runs the whole suite.
+
+# --- VM-centric samples (custom modules, state, shapes, pipelines) ---
+
+[[example]]
+name = "custom-module-basic"
+path = "custom_module/basic/main.rs"
+test = true
+
+[[example]]
+name = "tokenizer"
+path = "tokenizer/main.rs"
+test = true
+required-features = ["tokenizer"]
+
+[[example]]
+name = "variables-and-state"
+path = "variables_and_state/main.rs"
+test = true
+
+[[example]]
+name = "dynamic-shapes"
+path = "dynamic_shapes/main.rs"
+test = true
+
+[[example]]
+name = "simple-abs"
+path = "models/simple_abs.rs"
+test = true
+
+[[example]]
+name = "vision-inference"
+path = "models/vision_inference.rs"
+test = true
+required-features = ["llvm-cpu", "stablehlo"]
+
+[[example]]
+name = "transform-dialect"
+path = "compiler/transform_dialect.rs"
+test = true
+required-features = ["vulkan-compiler"]
+
+[[example]]
+name = "custom-dispatch-vulkan"
+path = "compiler/custom_dispatch.rs"
+test = true
+required-features = ["vulkan-compiler"]
+
+[[example]]
+name = "custom-dispatch-cuda"
+path = "compiler/custom_dispatch_cuda.rs"
+test = true
+required-features = ["cuda"]
+
+[[example]]
+name = "custom-dispatch-cpu"
+path = "compiler/custom_dispatch_cpu.rs"
+test = true
+required-features = ["llvm-cpu"]
+
+[[example]]
+name = "custom-dispatch-cpu-plugin"
+path = "compiler/custom_dispatch_cpu_plugin.rs"
+test = true
+required-features = ["llvm-cpu"]
+
+[[example]]
+name = "emitc-modules"
+path = "compiler/emitc_modules.rs"
+test = true
+
+[[example]]
+name = "static-library"
+path = "compiler/static_library.rs"
+test = true
+required-features = ["llvm-cpu"]
+
+[[example]]
+name = "baremetal-riscv64-vmvx"
+path = "compiler/baremetal_riscv64_vmvx.rs"
+test = true
+
+[[example]]
+name = "multiple-modules"
+path = "multiple_modules/main.rs"
+test = true
+
+[[example]]
+name = "custom-module-sync"
+path = "custom_module/sync/main.rs"
+test = true
+
+[[example]]
+name = "custom-module-async"
+path = "custom_module/async/main.rs"
+test = true
+
+[[example]]
+name = "sink-callback"
+path = "sink_callback/main.rs"
+test = true
+
+[[example]]
+name = "custom-module-static"
+path = "custom_module/static/main.rs"
+test = true
+
+[[example]]
+name = "custom-module-dynamic"
+path = "custom_module/dynamic/main.rs"
+test = true
+
+[[example]]
+name = "sink-callback-async"
+path = "sink_callback/async.rs"
+test = true
+required-features = ["io-parameters"]
+
+# --- HAL-centric samples (raw HAL, embedding, dispatch, static libraries) ---
+
+[[example]]
+name = "simple-embedding"
+path = "simple_embedding/main.rs"
+test = true
+required-features = ["local-task"]
+
+[[example]]
+name = "simple-embedding-vmvx-sync"
+path = "simple_embedding/vmvx_sync.rs"
+test = true
+required-features = ["local-sync"]
+
+[[example]]
+name = "simple-embedding-embedded-sync"
+path = "simple_embedding/embedded_sync.rs"
+test = true
+required-features = ["local-sync", "llvm-cpu"]
+
+[[example]]
+name = "simple-embedding-vulkan"
+path = "simple_embedding/vulkan.rs"
+test = true
+required-features = ["vulkan"]
+
+[[example]]
+name = "simple-embedding-cuda"
+path = "simple_embedding/cuda.rs"
+test = true
+required-features = ["cuda"]
+
+[[example]]
+name = "external-transients"
+path = "external_transients/main.rs"
+test = true
+required-features = ["local-task"]
+
+[[example]]
+name = "external-transients-vmvx-sync"
+path = "external_transients/vmvx_sync.rs"
+test = true
+required-features = ["local-sync"]
+
+[[example]]
+name = "hal-hello"
+path = "hal_hello/main.rs"
+test = true
+required-features = ["local-task"]

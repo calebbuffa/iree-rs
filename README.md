@@ -1,18 +1,31 @@
-# [IREE](https://iree.dev) for Rust
+# IREE for Rust
 
-| Crate      | Responsibility                                     |
-| ---------- | -------------------------------------------------- |
-| `iree-sys` | C bindings                                         |
-| `iree`     | Safe Rust interfaces; raw APIs through `iree::sys` |
-| `iree-gfx` | Vulkan/WGPU interop                                |
+This workspace provides Rust bindings for IREE's compiler, runtime, tokenizer,
+and native C APIs. The wrappers use Rust ownership and RAII; applications choose
+their own model, tensor, and execution abstractions.
 
-## Build
+| Crate | Purpose |
+| --- | --- |
+| [`ireec`](crates/ireec/README.md) | Compile input and configure compiler pipelines |
+| [`ireec-ir`](crates/ireec-ir/README.md) | Internal, unpublished MLIR bindings |
+| [`ireert`](crates/ireert/README.md) | VM, HAL, devices, buffers, and I/O |
+| [`ireetok`](crates/ireetok/README.md) | Tokenization and custom tokenizer components |
+| [`iree-native`](crates/iree-native/README.md) | Version-matched raw C bindings and native build |
+| [`iree-wgpu`](crates/iree-wgpu/README.md) | Internal, unpublished WGPU/Vulkan interop |
 
-`iree-sys` provisions pinned, verified sources through Woodshed, builds the
-selected native capabilities, then generates bindings against that target's
-headers and native configuration. All generated Rust and C files stay in
-Cargo's build directory.
+Start with the [usage guide](docs/guide.md) or run a
+[sample](examples/README.md):
 
-## Deploy
+```powershell
+cargo run -p iree-samples --example simple-abs
+```
 
-See [native build and deployment](crates/iree-sys/native/README.md).
+`iree-native` builds pinned IREE sources and requires Rust 1.95+, CMake 3.26+,
+Ninja, Python 3, host libclang, and the destination C/C++ toolchain and SDK.
+Compiler features also build LLVM/MLIR. Cargo features select runtime drivers,
+compiler targets, and input dialects independently; see the
+[feature guide](docs/guide.md).
+
+VM bytecode and native executables are trusted code, not a sandbox. Hosted
+docs.rs builds are not supported because bindings and documentation use the
+selected native installation and require libclang.

@@ -1,0 +1,20 @@
+[package]
+name = "iree-bare-metal"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[workspace]
+
+[dependencies]
+iree = { path = @IREE_CRATE@, default-features = false, features = ["bare-metal"] }
+
+[profile.dev]
+panic = "abort"
+opt-level = 2
+
+[profile.release]
+panic = "abort"
+opt-level = "s"
+lto = true
+codegen-units = 1

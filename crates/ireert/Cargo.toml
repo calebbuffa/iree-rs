@@ -1,0 +1,43 @@
+[package]
+name = "ireert"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Rust API for the IREE runtime"
+readme = "README.md"
+repository.workspace = true
+homepage.workspace = true
+documentation = "https://github.com/calebbuffa/iree-rs/blob/main/crates/ireert/README.md"
+
+[features]
+default = ["cpu"]
+cpu = ["iree-native/cpu"]
+bare-metal = ["iree-native/bare-metal"]
+io-index = ["iree-native/io-index"]
+io-parameters = ["io-index", "iree-native/io-parameters"]
+io-format-irpa = ["io-index", "iree-native/io-format-irpa"]
+io-format-gguf = ["io-index", "iree-native/io-format-gguf"]
+io-format-safetensors = ["io-index", "iree-native/io-format-safetensors"]
+local-sync = ["iree-native/local-sync"]
+local-task = ["iree-native/local-task"]
+vulkan = ["iree-native/vulkan"]
+cuda = ["iree-native/cuda"]
+hip = ["iree-native/hip"]
+amdgpu = ["iree-native/amdgpu"]
+metal = ["iree-native/metal"]
+webgpu = ["iree-native/webgpu"]
+null = ["iree-native/null"]
+mpi = ["iree-native/mpi"]
+
+[dependencies]
+iree-native = { version = "0.1.0", path = "../iree-native", default-features = false }
+memmap2 = "0.9"
+bytemuck = { version = "1", features = ["derive"] }
+
+[dev-dependencies]
+proptest = "1"
+ireec = { path = "../ireec" }
+
+[lints]
+workspace = true

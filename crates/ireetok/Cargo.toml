@@ -1,0 +1,20 @@
+[package]
+name = "ireetok"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Rust API for the IREE tokenizer"
+readme = "README.md"
+repository.workspace = true
+homepage.workspace = true
+documentation = "https://github.com/calebbuffa/iree-rs/blob/main/crates/ireetok/README.md"
+
+[dependencies]
+iree-native = { version = "0.1.0", path = "../iree-native", default-features = false, features = ["tokenizer"] }
+
+[dev-dependencies]
+proptest = "1"
+
+[lints]
+workspace = true

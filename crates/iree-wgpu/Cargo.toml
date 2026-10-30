@@ -1,0 +1,46 @@
+[package]
+name = "iree-wgpu"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Safe, zero-copy interoperability between WGPU and the IREE runtime on one Vulkan device"
+readme = "README.md"
+repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/iree-wgpu"
+keywords = ["iree", "wgpu", "vulkan", "gpu", "interop"]
+categories = ["graphics", "rendering", "science", "api-bindings"]
+include = ["src/**", "examples/**", "tests/**", "Cargo.toml", "README.md", "LICENSE", "LICENSE-LLVM-EXCEPTION", "NOTICE"]
+publish = false
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[features]
+default = []
+# Compile MLIR on the fly with `Context::compile`; re-exports `ireec` as `compiler`.
+compiler = ["dep:ireec"]
+
+[dependencies]
+ireert = { version = "0.1.0", path = "../ireert", default-features = false, features = ["vulkan"] }
+ireec = { version = "0.1.0", path = "../ireec", optional = true, features = ["target-vulkan", "input-stablehlo"] }
+bytemuck = "1"
+wgpu = { version = "30", default-features = false, features = ["vulkan", "wgsl", "std"] }
+ash = "0.38"
+
+[dev-dependencies]
+pollster = "0.4"
+winit = "0.30"
+
+[[example]]
+name = "shared_buffer"
+required-features = ["compiler"]
+
+[[example]]
+name = "render_analysis"
+required-features = ["compiler"]
+
+[lints]
+workspace = true

@@ -1,3 +1,7 @@
 /target/
 /target-*/
+**/*.pin.lock
 **/target/
+**/__pycache__/
+/crates/iree-native/generated/
+ref_only

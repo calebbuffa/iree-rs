@@ -1,0 +1,24 @@
+[package]
+name = "iree-wasm-example"
+version = "0.0.0"
+edition = "2021"
+publish = false
+description = "Run the IREE Rust crate on wasm32-unknown-emscripten (Node.js / browser)."
+
+[workspace]
+# Keep host compiler features separate from the target runtime.
+resolver = "2"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+iree = { path = "../../crates/iree", default-features = false, features = ["std", "local-sync"] }
+
+[build-dependencies]
+iree-compiler = { path = "../../crates/iree-compiler" }
+
+[profile.release]
+opt-level = "z"
+lto = true
+panic = "abort"

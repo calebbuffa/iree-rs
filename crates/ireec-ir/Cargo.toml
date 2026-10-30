@@ -1,0 +1,23 @@
+[package]
+name = "ireec-ir"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Rust API for the IREE compiler MLIR interop"
+repository.workspace = true
+homepage.workspace = true
+publish = false
+
+[dependencies]
+thiserror = "2"
+iree-native = { version = "0.1.0", path = "../iree-native", default-features = false, features = [
+    "compiler",
+] }
+ireec = { version = "0.1.0", path = "../ireec" }
+
+[dev-dependencies]
+proptest = "1"
+
+[lints]
+workspace = true

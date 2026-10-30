@@ -1,0 +1,186 @@
+# To upgrade IREE and all its dependencies:
+#   woodshed bump iree <version> --git https://github.com/iree-org/iree --ref <commit> --manifest native/woodshed.toml
+# Only IREE is selected here. Everything else follows its upstream declarations.
+# woodshed.lock is generated; never edit checksums or child revisions by hand.
+
+[features]
+bare-metal = []
+compiler = ["dep:llvm"]
+compiler-tools = []
+mpi = []
+cpu = []
+local-sync = []
+local-task = []
+task = []
+tokenizer = []
+vulkan = ["dep:vulkan_headers"]
+cuda = []
+hip = ["dep:hip_build_deps"]
+amdgpu = ["dep:hsa_runtime_headers"]
+metal = []
+null = []
+webgpu = []
+io-index = []
+io-parameters = []
+io-format-irpa = []
+io-format-gguf = []
+io-format-safetensors = []
+target-llvm-cpu = []
+target-vulkan = []
+target-cuda = []
+target-rocm = []
+target-metal = ["dep:spirv_cross"]
+target-webgpu = [
+    "dep:dawn",
+    "dep:abseil",
+    "dep:spirv_headers",
+    "dep:spirv_tools",
+]
+target-wasm = []
+llvm-aarch64 = []
+llvm-arm = []
+llvm-riscv = []
+llvm-x86 = []
+llvm-webassembly = []
+input-stablehlo = []
+input-tosa = []
+input-torch = ["dep:torch_mlir"]
+# Cargo permits input-stablehlo without compiler. The superbuild selects this
+# combined capability only when both are enabled, avoiding an unused download.
+compiler-stablehlo = ["dep:stablehlo"]
+
+[dependencies.iree]
+version = "3.14.0"
+ref = "5f72e26ac2e941ccf40ead9e30c438993282de9d"
+markers = [
+    "CMakeLists.txt",
+    "runtime/src/iree/runtime/api.h",
+    "compiler/bindings/c/iree/compiler/embedding_api.h",
+]
+git = "https://github.com/iree-org/iree"
+
+# These dependencies follow named variables and FetchContent declarations
+# in IREE's CMake files. No regular expressions or duplicated URLs are needed.
+[dependencies.abseil]
+optional = true
+markers = ["CMakeLists.txt"]
+
+[dependencies.abseil.resolve]
+kind = "file"
+parent = "iree"
+revision = { path = "compiler/plugins/target/WebGPUSPIRV/CMakeLists.txt", cmake-variable = "IREE_ABSEIL_TAG" }
+url = { path = "compiler/plugins/target/WebGPUSPIRV/dawn/CMakeLists.txt", cmake-url = "abseil" }
+
+[dependencies.dawn]
+optional = true
+markers = ["CMakeLists.txt"]
+
+[dependencies.dawn.resolve]
+kind = "file"
+parent = "iree"
+revision = { path = "compiler/plugins/target/WebGPUSPIRV/CMakeLists.txt", cmake-variable = "IREE_DAWN_TAG" }
+url = { path = "compiler/plugins/target/WebGPUSPIRV/dawn/CMakeLists.txt", cmake-url = "dawn" }
+
+[dependencies.flatcc]
+markers = ["include/flatcc/flatcc_builder.h", "src/runtime/verifier.c"]
+
+[dependencies.flatcc.resolve]
+kind = "gitlink"
+parent = "iree"
+path = "third_party/flatcc"
+archive = "{repository}/archive/{revision}.tar.gz"
+
+[dependencies.hip_build_deps]
+optional = true
+markers = ["include/hip/hip_version.h"]
+
+[dependencies.hip_build_deps.resolve]
+kind = "gitlink"
+parent = "iree"
+path = "third_party/hip-build-deps"
+archive = "{repository}/archive/{revision}.zip"
+
+[dependencies.hsa_runtime_headers]
+optional = true
+markers = ["include/hsa/hsa.h"]
+
+[dependencies.hsa_runtime_headers.resolve]
+kind = "gitlink"
+parent = "iree"
+path = "third_party/hsa-runtime-headers"
+archive = "{repository}/archive/{revision}.zip"
+
+[dependencies.llvm]
+optional = true
+markers = [
+    "llvm/CMakeLists.txt",
+    "mlir/CMakeLists.txt",
+    "clang/CMakeLists.txt",
+    "lld/CMakeLists.txt",
+]
+
+[dependencies.llvm.resolve]
+kind = "gitlink"
+parent = "iree"
+path = "third_party/llvm-project"
+archive = "{repository}/archive/{revision}.tar.gz"
+
+[dependencies.spirv_cross]
+optional = true
+markers = ["CMakeLists.txt", "spirv_cross.hpp"]
+
+[dependencies.spirv_cross.resolve]
+kind = "gitlink"
+parent = "iree"
+path = "third_party/spirv_cross"
+archive = "{repository}/archive/{revision}.zip"
+
+[dependencies.spirv_headers]
+optional = true
+markers = ["CMakeLists.txt"]
+
+[dependencies.spirv_headers.resolve]
+kind = "file"
+parent = "iree"
+revision = { path = "compiler/plugins/target/WebGPUSPIRV/CMakeLists.txt", cmake-variable = "IREE_SPIRV_HEADERS_TAG" }
+url = { path = "compiler/plugins/target/WebGPUSPIRV/spirv-headers/CMakeLists.txt", cmake-url = "spirv-headers" }
+
+[dependencies.spirv_tools]
+optional = true
+markers = ["CMakeLists.txt"]
+
+[dependencies.spirv_tools.resolve]
+kind = "file"
+parent = "iree"
+revision = { path = "compiler/plugins/target/WebGPUSPIRV/CMakeLists.txt", cmake-variable = "IREE_SPIRV_TOOLS_TAG" }
+url = { path = "compiler/plugins/target/WebGPUSPIRV/spirv-tools/CMakeLists.txt", cmake-url = "spirv-tools" }
+
+[dependencies.stablehlo]
+optional = true
+markers = ["CMakeLists.txt", "stablehlo/dialect/StablehloOps.td"]
+
+[dependencies.stablehlo.resolve]
+kind = "gitlink"
+parent = "iree"
+path = "third_party/stablehlo"
+archive = "{repository}/archive/{revision}.tar.gz"
+
+[dependencies.torch_mlir]
+optional = true
+markers = ["CMakeLists.txt"]
+
+[dependencies.torch_mlir.resolve]
+kind = "gitlink"
+parent = "iree"
+path = "third_party/torch-mlir"
+archive = "{repository}/archive/{revision}.zip"
+
+[dependencies.vulkan_headers]
+optional = true
+markers = ["CMakeLists.txt", "include/vulkan/vulkan.h"]
+
+[dependencies.vulkan_headers.resolve]
+kind = "gitlink"
+parent = "iree"
+path = "third_party/vulkan_headers"
+archive = "{repository}/archive/{revision}.tar.gz"

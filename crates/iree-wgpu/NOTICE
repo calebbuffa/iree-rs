@@ -1,0 +1,15 @@
+IREE Rust graphics interoperability crate
+
+This crate links to IREE through the iree Rust binding crate.
+IREE 3.13.0 (revision 89ece87b89852100c0a4ac3d515e14842d090967):
+Copyright The IREE Authors.
+https://github.com/iree-org/iree
+
+IREE and its LLVM-derived components are licensed under the Apache License 2.0
+with LLVM Exceptions. See LICENSE and LICENSE-LLVM-EXCEPTION.
+The Rust wrapper is licensed under Apache-2.0.
+
+Native dependencies are downloaded separately using the source revisions and
+checksums in the iree-native crate's native/woodshed.lock. Distribution of native
+libraries, compiler tools, SDK components, or their object code must also comply
+with their respective licenses and attribution requirements.

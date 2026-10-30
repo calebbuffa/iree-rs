@@ -1,5 +1,14 @@
 [workspace]
-members = ["crates/iree-sys", "crates/iree", "crates/iree-gfx"]
+members = [
+    "crates/iree-native",
+    "crates/ireec",
+    "crates/ireec-ir",
+    "crates/ireert",
+    "crates/ireetok",
+    "crates/iree-wgpu",
+    "examples",
+    "examples/custom_module/dynamic-module",
+]
 resolver = "3"
 
 [workspace.package]
@@ -7,6 +16,17 @@ version = "0.1.0"
 edition = "2024"
 rust-version = "1.95"
 license = "Apache-2.0"
+repository = "https://github.com/calebbuffa/iree-rs"
+homepage = "https://github.com/calebbuffa/iree-rs"
 
 [workspace.lints.rust]
 missing_docs = "deny"
+
+[workspace.lints.clippy]
+undocumented_unsafe_blocks = "deny"
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+todo = "deny"
+unimplemented = "deny"
+unreachable = "deny"

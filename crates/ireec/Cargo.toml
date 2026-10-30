@@ -1,0 +1,41 @@
+[package]
+name = "ireec"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Rust API for the IREE compiler"
+readme = "README.md"
+repository.workspace = true
+homepage.workspace = true
+documentation = "https://github.com/calebbuffa/iree-rs/blob/main/crates/ireec/README.md"
+
+[features]
+target-llvm-cpu = ["iree-native/target-llvm-cpu"]
+target-vulkan = ["iree-native/target-vulkan"]
+target-cuda = ["iree-native/target-cuda"]
+target-rocm = ["iree-native/target-rocm"]
+target-metal = ["iree-native/target-metal"]
+target-webgpu = ["iree-native/target-webgpu"]
+target-wasm = ["iree-native/target-wasm"]
+llvm-aarch64 = ["iree-native/llvm-aarch64"]
+llvm-arm = ["iree-native/llvm-arm"]
+llvm-riscv = ["iree-native/llvm-riscv"]
+llvm-x86 = ["iree-native/llvm-x86"]
+llvm-webassembly = ["iree-native/llvm-webassembly"]
+input-stablehlo = ["iree-native/input-stablehlo"]
+input-tosa = ["iree-native/input-tosa"]
+input-torch = ["iree-native/input-torch"]
+tools = ["iree-native/compiler-tools"]
+
+[dependencies]
+thiserror = "2"
+iree-native = { version = "0.1.0", path = "../iree-native", default-features = false, features = [
+    "compiler",
+] }
+
+[dev-dependencies]
+proptest = "1"
+
+[lints]
+workspace = true
